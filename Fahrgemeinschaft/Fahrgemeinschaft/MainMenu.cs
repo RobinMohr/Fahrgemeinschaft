@@ -28,11 +28,13 @@ namespace Fahrgemeinschaft
                                 " ╟────────────────────────────╢\n" +
                                 "3╬  meine Fahrten verwalten:  ║\n" +
                                 " ╟────────────────────────────╢\n" +
-                                "4╬    Nutzerdaten ausgeben    ║\n" +
+                                "4╬  Fahrten und Suchanzeigen  ║\n" +
                                 " ╟────────────────────────────╢\n" +
-                                "5╬     Nutzerdaten ändern     ║\n" +
+                                "5╬    Nutzerdaten ausgeben    ║\n" +
                                 " ╟────────────────────────────╢\n" +
-                                "6╬         ausloggen          ║\n" +
+                                "6╬     Nutzerdaten ändern     ║\n" +
+                                " ╟────────────────────────────╢\n" +
+                                "7╬         ausloggen          ║\n" +
                                 " ╚════════════════════════════╝\n");
 
                
@@ -67,17 +69,21 @@ namespace Fahrgemeinschaft
                                 goto MainMenu;
 
                             case 4:
+                                App.AllData(user);
+                                goto MainMenu;
+
+                            case 5:
 
                                 PrintingUserData(user);
 
                                 Console.ReadKey();
                                 goto MainMenu;
 
-                            case 5:
+                            case 6:
                                 user = UserCreation.ChangeData(user);
                                 goto MainMenu;
 
-                            case 6:
+                            case 7:
 
                                 var fileName = Assembly.GetExecutingAssembly().Location;
                                 System.Diagnostics.Process.Start(fileName);
@@ -101,7 +107,14 @@ namespace Fahrgemeinschaft
             int most = 0;
 
             string id = Convert.ToString(user.ID);
-            string pw = Convert.ToString(user.PW);
+            string pw = "";
+
+            foreach (char c in user.PW)
+            {
+                pw += "*";
+            }
+
+
             string name = Convert.ToString(user.Name);
             string direction = Convert.ToString(user.Direction);
             string distance = Convert.ToString(user.Distance);
@@ -181,7 +194,7 @@ namespace Fahrgemeinschaft
                     }
                     else if (j == 7)
                     {
-                        string pw_ = $"PW:{user.PW}".PadLeft((pw.Count() + 3) / 2 + most / 2);
+                        string pw_ = $"PW:{pw}".PadLeft((pw.Count() + 3) / 2 + most / 2);
                         pw_ = pw_.PadRight(most - 4);
 
 

@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="MainMenu.cs" />
+    <Compile Include="Maps.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

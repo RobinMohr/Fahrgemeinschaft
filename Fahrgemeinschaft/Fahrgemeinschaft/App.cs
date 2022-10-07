@@ -344,20 +344,22 @@ namespace Fahrgemeinschaft
                             Console.WriteLine("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
                             x++;
                         }
-                    chooseNonDriver:
-
 
                         Console.WriteLine("\n╔════════════════════════════╗\n" +
                                             "║ Wen möchtest du mitnehmen? ║\n" +
                                             "╚════════════════════════════╝\n");
 
                         int.TryParse(Convert.ToString(Console.ReadKey().KeyChar), out int chooseNonDriver);
-                        
-                                allEntries.Remove(allEntries[chooseNonDriver]);
-                            person.Free_Spaces = person.Free_Spaces - nonDrivers[chooseNonDriver].Amount;
+
+                        Console.WriteLine("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+                        Console.WriteLine($"Du hast ausgewählt: {allEntries[chooseNonDriver][1]}, {string.Join(".", allEntries[chooseNonDriver][3])}, {allEntries[chooseNonDriver][4]}\n");
+                        Console.WriteLine("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+
+                        allEntries.Remove(allEntries[chooseNonDriver]);
+                        person.Free_Spaces = person.Free_Spaces - nonDrivers[chooseNonDriver].Amount;
                         if (person.Free_Spaces == 0)
                         {
-                            allEntries.Remove(allEntries[allEntries.Count]);
+                            allEntries.Remove(allEntries[allEntries.Count-1]);
                         }
 
 
@@ -699,6 +701,62 @@ namespace Fahrgemeinschaft
                                       "║ Niemand bietet gerade eine Fahrgemeinschaft an ║\n" +
                                       "╚════════════════════════════════════════════════╝");
                     Thread.Sleep(1500);
+                }
+                else
+                {
+
+                    Console.WriteLine("╔════════════════════════════════════════════════════════════╗\n" +
+                                      "║ Möchtest du bei jemanden von den Personen mitfahren? (y/n) ║\n" +
+                                      "╚════════════════════════════════════════════════════════════╝\n");
+
+                    ConsoleKeyInfo askingUserToPickSomeoneUp = Console.ReadKey();
+                    if (Convert.ToString(askingUserToPickSomeoneUp.KeyChar) == "y")
+                    {
+                        Console.Clear();
+                        int x = 0;
+                        foreach (Person p in drivers)
+                        {
+                            Console.WriteLine();
+                            Console.WriteLine($"{x}: {p.Name}, {string.Join(".", p.Time)}, {p.Free_Spaces}\n");
+                            Console.WriteLine("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+                            x++;
+                        }
+
+                        Console.WriteLine("\n╔════════════════════════════════╗\n" +
+                                            "║ Bei wem möchtest du mitfahren? ║\n" +
+                                            "╚════════════════════════════════╝\n");
+
+                        int.TryParse(Convert.ToString(Console.ReadKey().KeyChar), out int chooseDriver);
+
+                        Console.WriteLine("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+                        Console.WriteLine($"Du hast ausgewählt: {allEntries[chooseDriver][1]}, {string.Join(".", allEntries[chooseDriver][3])}, {allEntries[chooseDriver][4]}\n");
+                        Console.WriteLine("▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬");
+
+                        allEntries.Remove(allEntries[allEntries.Count - 1]);
+                        allEntries[chooseDriver][5] = Convert.ToString(Convert.ToInt32(allEntries[chooseDriver][5]) - person.Amount);
+                        if (person.Free_Spaces == 0)
+                        {
+                            allEntries.Remove(allEntries[chooseDriver]);
+                        }
+
+
+                        using (StreamWriter sw = new StreamWriter(program.PathRouteData))
+                        {
+                            for (int i = 0; i < allEntries.Count; i++)
+                            {
+                                sw.WriteLine(String.Join(";", allEntries[i]));
+                            }
+                        }
+
+
+
+
+
+
+
+
+
+                    }
                 }
             }
         }
@@ -1154,6 +1212,123 @@ namespace Fahrgemeinschaft
                 {
                     goto DelOrChange;
                 }
+            }
+        }
+
+        public static void AllData(UserCreation user)
+        {
+            Program program = new Program();
+
+            List<string[]> entries = new List<string[]>();
+
+            using (StreamReader sr = new StreamReader(program.PathRouteData))
+            {
+                while (!sr.EndOfStream)
+                {
+                    entries.Add(sr.ReadLine().Split(';'));
+                }
+            }
+
+            List<string> drivers = new List<string>();
+            List<string> nonDrivers = new List<string>();
+
+            int count_drivers = 0;
+            int count_nonDrivers = 0;
+
+            foreach (string[] entry in entries)
+            {
+                if (Convert.ToInt32(entry[0]) == 0)
+                {
+                    nonDrivers.Add($"Der User: {entry[1]}, mit der ID: {entry[2]} möchte am {entry[3]} mit {entry[4]} anderen Leuten nach Weikersheim.");
+                    count_nonDrivers++;
+                }
+                else if (Convert.ToInt32(entry[0]) == 1)
+                {
+                    drivers.Add($"Der User: {entry[1]}, mit der ID: {entry[2]} möchte am {entry[3]} mit {entry[5]} freien Plätzen nach Weikersheim.");
+                    count_drivers++;
+                }
+            }
+
+        AskUserForData:
+            Console.Clear();
+            Console.WriteLine("möchtest du alle daten(0), nur die suchanfragen(1), oder nur die Fahrangebote(2) angezeigt bekommen?");
+
+
+            ConsoleKeyInfo whatUserData = Console.ReadKey();
+
+            switch (Convert.ToInt32(Convert.ToString(whatUserData.KeyChar)))
+            {
+                case 0:
+                    if (count_drivers == 0)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Momentan gibt es keine Fahrangebote.");                       
+                    }
+                    else
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Das sind alle Fahrangebote:");
+                        foreach (string driver in drivers)
+                        {
+                            Console.WriteLine(driver);
+                        }
+                    }
+
+                    if (count_nonDrivers == 0)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Momentan gibt es keine Suchanfragen.");
+                    }
+                    else
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Das sind alle Suchanfragen:");
+                        foreach (string nonDriver in nonDrivers)
+                        {
+                            Console.WriteLine(nonDriver);
+                        }
+                    }
+                    break;
+
+                case 1:
+
+                    if (count_drivers == 0)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Momentan gibt es keine Fahrangebote.");
+                    }
+                    else
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Das sind alle Fahrangebot:");
+                        foreach (string driver in drivers)
+                        {
+                            Console.WriteLine(driver);
+                        }
+                    }
+                    break;
+
+                case 2:
+
+                    if (count_nonDrivers == 0)
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Momentan gibt es keine Suchanfragen.");
+                    }
+                    else
+                    {
+                        Console.Clear();
+                        Console.WriteLine("Das sind alle Suchanfragen:");
+                        foreach (string nonDriver in nonDrivers)
+                        {
+                            Console.WriteLine(nonDriver);
+                        }
+                    }
+                    break;
+
+                default:
+                    goto AskUserForData;
+
             }
         }
     }

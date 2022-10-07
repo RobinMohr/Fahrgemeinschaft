@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Services;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -248,7 +250,37 @@ namespace Fahrgemeinschaft
             Console.WriteLine("╔═══════════════════════════════════════════════════════════════════════════════════════════════╗\n" +
                               "║ Bitte erstelle ein Passwort. Mit diesem und deiner ID kannst du dich später wieder einloggen. ║\n" +
                               "╚═══════════════════════════════════════════════════════════════════════════════════════════════╝");
-            user.PW = Console.ReadLine();
+            string password = "";
+            ConsoleKeyInfo keyInfo;
+
+            do
+            {
+                keyInfo = Console.ReadKey();
+
+                if (keyInfo.Key == ConsoleKey.Backspace)
+                {
+                    if (password.Length != 0)
+                    {
+                        Console.Write(' ');
+                        Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                        password = password.Substring(0, password.Length - 1);
+                    }                    
+                }
+                else if (keyInfo.Key != ConsoleKey.Enter)
+                {
+                    Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+
+                    if (Convert.ToInt32(keyInfo.KeyChar) != 0)
+                    {
+                        Console.Write('*');
+                        password += keyInfo.KeyChar;
+                    }
+                }
+
+            } while (keyInfo.Key != ConsoleKey.Enter && password.Length < 33);
+
+            user.PW = password;
+
             return user;
         }
 
@@ -258,7 +290,7 @@ namespace Fahrgemeinschaft
 
             do
             {
-                ChangeData:
+            ChangeData:
 
                 Console.Clear();
 
@@ -297,23 +329,79 @@ namespace Fahrgemeinschaft
 
                                 string old_pw = user.PW;
 
-                                EnterOldPW:
+                            EnterOldPW:
 
                                 Console.Clear();
                                 Console.WriteLine("╔═════════════════════════════════════╗\n" +
                                                   "║ Bitte gebe dein altes Passwort ein: ║\n" +
                                                   "╚═════════════════════════════════════╝");
-                               
-                                if (old_pw == Console.ReadLine())
+                                string password = "";
+                                ConsoleKeyInfo keyInfo;
+
+                                do
                                 {
-                                    EnterNewPW:
+                                    keyInfo = Console.ReadKey();
+
+                                    if (keyInfo.Key == ConsoleKey.Backspace)
+                                    {
+                                        if (password.Length != 0)
+                                        {
+                                            Console.Write(' ');
+                                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                                            password = password.Substring(0, password.Length - 1);
+                                        }
+                                    }
+                                    else if (keyInfo.Key != ConsoleKey.Enter)
+                                    {
+                                        Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+
+                                        if (Convert.ToInt32(keyInfo.KeyChar) != 0)
+                                        {
+                                            Console.Write('*');
+                                            password += keyInfo.KeyChar;
+                                        }
+                                    }
+
+                                } while (keyInfo.Key != ConsoleKey.Enter && password.Length < 33);
+
+
+                                if (old_pw == password)
+                                {
+                                EnterNewPW:
 
                                     Console.Clear();
                                     Console.WriteLine("╔═════════════════════════════════════╗\n" +
                                                       "║ Bitte gebe dein neues Passwort ein: ║\n" +
                                                       "╚═════════════════════════════════════╝");
 
-                                    string new_pw = Console.ReadLine();
+                                    string new_password = "";
+                                    ConsoleKeyInfo keyInfo1;
+
+                                    do
+                                    {
+                                        keyInfo1 = Console.ReadKey();
+
+                                        if (keyInfo1.Key == ConsoleKey.Backspace)
+                                        {
+                                            if (new_password.Length != 0)
+                                            {
+                                                Console.Write(' ');
+                                                Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                                                new_password = new_password.Substring(0, new_password.Length - 1);
+                                            }
+                                        }
+                                        else if (keyInfo1.Key != ConsoleKey.Enter)
+                                        {
+                                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+
+                                            if (Convert.ToInt32(keyInfo1.KeyChar) != 0)
+                                            {
+                                                Console.Write('*');
+                                                new_password += keyInfo1.KeyChar;
+                                            }
+                                        }
+
+                                    } while (keyInfo1.Key != ConsoleKey.Enter && new_password.Length < 33);
 
                                 ConfirmNewPW:
 
@@ -321,9 +409,39 @@ namespace Fahrgemeinschaft
                                     Console.WriteLine("╔═════════════════════════════════════╗\n" +
                                                       "║    Bitte bestätige dein Passwort    ║\n" +
                                                       "╚═════════════════════════════════════╝");
-                                    if (new_pw == Console.ReadLine())
+
+                                    string password2 = "";
+                                    ConsoleKeyInfo keyInfo2;
+
+                                    do
                                     {
-                                        user.PW = new_pw;
+                                        keyInfo2 = Console.ReadKey();
+
+                                        if (keyInfo2.Key == ConsoleKey.Backspace)
+                                        {
+                                            if (password2.Length != 0)
+                                            {
+                                                Console.Write(' ');
+                                                Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                                                password2 = password2.Substring(0, password2.Length - 1);
+                                            }
+                                        }
+                                        else if (keyInfo2.Key != ConsoleKey.Enter)
+                                        {
+                                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+
+                                            if (Convert.ToInt32(keyInfo2.KeyChar) != 0)
+                                            {
+                                                Console.Write('*');
+                                                password2 += keyInfo2.KeyChar;
+                                            }
+                                        }
+
+                                    } while (keyInfo2.Key != ConsoleKey.Enter && password2.Length < 33);
+
+                                    if (password2 == new_password)
+                                    {
+                                        user.PW = new_password;
                                     }
                                     else
                                     {
@@ -336,7 +454,7 @@ namespace Fahrgemeinschaft
                                         {
                                             goto EnterNewPW;
                                         }
-                                       
+
                                     }
                                 }
                                 else
@@ -348,8 +466,7 @@ namespace Fahrgemeinschaft
                                     }
                                     goto EnterOldPW;
                                 }
-                                break;
-
+                                goto ChangeAnother;
                             case 2:
                                 Console.Clear();
                                 Console.WriteLine("╔════════════════════════════════╗\n" +
@@ -357,24 +474,21 @@ namespace Fahrgemeinschaft
                                                   "╚════════════════════════════════╝");
                                 user.Name = Console.ReadLine();
 
-                                break;
-
+                                goto ChangeAnother;
                             case 3:
                                 Console.Clear();
                                 Console.WriteLine("╔════════════════════════════════════════════════════╗\n" +
                                                   "║ In welcher Richtung von Weikersheim aus wohnst du? ║\n" +
                                                   "╚════════════════════════════════════════════════════╝");
                                 user.Direction = Console.ReadLine();
-                                break;
-
+                                goto ChangeAnother;
                             case 4:
                                 Console.Clear();
                                 Console.WriteLine("╔══════════════════════════════════════════════╗\n" +
                                                   "║ Wie weit wwohnst du von Weikersheim aus weg? ║\n" +
                                                   "╚══════════════════════════════════════════════╝");
                                 user.Distance = Convert.ToDouble(Console.ReadLine());
-                                break;
-
+                                goto ChangeAnother;
                             default:
                                 break;
                         }
@@ -382,9 +496,9 @@ namespace Fahrgemeinschaft
                     }
                 }
 
-            
-           
-                
+
+            ChangeAnother:
+
                 Console.Clear();
                 Console.WriteLine("╔═════════════════════════╗\n" +
                                   "║ Deine neuen Daten sind: ║\n" +
@@ -401,27 +515,27 @@ namespace Fahrgemeinschaft
                 string entry1 = Convert.ToString(entry2.KeyChar);
                 entry1.ToLower();
 
-                if (entry1 == "y"){ goto ChangeData; }
+                if (entry1 == "y") { goto ChangeData; }
 
                 else if (entry1 == "n")
                 {
                     List<string[]> entries = new List<string[]>();
-                    
+
                     using (StreamReader sr = new StreamReader(program.PathUserData))
                     {
                         while (!sr.EndOfStream)
                         {
                             entries.Add(sr.ReadLine().Split(';'));
                         }
-                        
+
                         for (int i = 0; i == entries.Count; i++)
                         {
                             if (Convert.ToInt32(entries[0][i]) == user.ID)
-                            {                                                               
+                            {
                                 entries[1][i] = user.PW;
                                 entries[2][i] = user.Name;
                                 entries[3][i] = user.Direction;
-                                entries[4][i] = Convert.ToString(user.Distance);                                
+                                entries[4][i] = Convert.ToString(user.Distance);
                             }
                         }
                     }
@@ -465,11 +579,14 @@ namespace Fahrgemeinschaft
                     int entry = int.Parse(userInput.KeyChar.ToString());
                     if (entry < 0 || entry >= 2)
                     {
-                       
+                       goto LogInScreen;
                     }
                         
                     else if (entry == 0)
                     {
+                    EnterID:
+
+
                         using (StreamReader sr = new StreamReader(program.PathUserData))
                         {
                             while (!sr.EndOfStream)
@@ -478,35 +595,88 @@ namespace Fahrgemeinschaft
                             }
                         }
 
-                        EnterID:
-
                         Console.Clear();
 
-                        Console.WriteLine("╔══════════════════════╗\n" +
-                                          "║ Wie lautet deine ID? ║\n" +
-                                          "╚══════════════════════╝");
-                        string id = Console.ReadLine();
-                        int counter = 0;
+                        Console.WriteLine("╔══════════════════════════╗\n" +
+                                          "║ Bitte gebe deine ID ein: ║\n" +
+                                          "╚══════════════════════════╝\n\n\n");
+                        Console.WriteLine("╔═══════════════════════════════╗\n" +
+                                          "║ Bitte gebe dein Passwort ein: ║\n" +
+                                          "╚═══════════════════════════════╝\n\n");
 
-                        if (id == "r")
+                        string id = "";
+                        ConsoleKeyInfo Key;
+
+                        Console.SetCursorPosition(0, 4);
+                        do
                         {
-                            goto LogInScreen;
-                        }
+                            Key = Console.ReadKey();
+                            if (Key.Key == ConsoleKey.Backspace && id.Length !=0)
+                            {
+                                Console.Write(' ');
+                                Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                                id = id.Substring(0, id.Length - 1);
+                            }
+
+                            else if (Key.Key != ConsoleKey.Enter)
+                            {
+                                id += Key.KeyChar;
+                            }
+
+                            if (Key.Key == ConsoleKey.Enter && id.Length == 0)
+                            {
+                                goto LogInScreen;
+                            }
+                            
+                        } while (Key.Key != ConsoleKey.Enter);
+
+
+                        //Console.Clear();
+                        int counter = 0;
 
                         for (int i = 0; i < entries.Count; i++)
                         {
                             if (entries[i][0] == id)
                             {
                                 counter++;
-                                EnterPW:
-                                Console.Clear();
-                                Console.WriteLine("╔═══════════════════════════════╗\n" +
-                                                  "║ Bitte gebe dein Passwort ein: ║\n" +
-                                                  "╚═══════════════════════════════╝");
+    
+                                string pw = "";
+                                ConsoleKeyInfo keyInfo;
+                                
+                                Console.SetCursorPosition(0, 10);
 
-                                int pw = Convert.ToInt32(Console.ReadLine());
+                                do
+                                {
+                                    keyInfo = Console.ReadKey();
 
-                                if (Convert.ToInt32(entries[i][1]) == pw)
+                                    if (keyInfo.Key == ConsoleKey.Enter && pw.Length == 0)
+                                    {
+                                        goto LogInScreen;
+                                    }
+
+                                    if (keyInfo.Key == ConsoleKey.Backspace)
+                                    {
+                                        if (pw.Length != 0)
+                                        {
+                                            Console.Write(' ');
+                                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                                            pw = pw.Substring(0, pw.Length - 1);
+                                        }
+                                    }
+                                    else if (keyInfo.Key != ConsoleKey.Enter)
+                                    {
+
+                                        if (Convert.ToInt32(keyInfo.KeyChar) != 0)
+                                        {
+                                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+                                            Console.Write('*');
+                                            pw += keyInfo.KeyChar;
+                                        }
+                                    }
+
+                                } while (keyInfo.Key != ConsoleKey.Enter && pw.Length < 33);
+
+                                if (entries[i][1] == pw)
                                 {
                                     user.ID = Convert.ToInt32(entries[i][0]);
                                     user.PW = entries[i][1];
@@ -515,14 +685,14 @@ namespace Fahrgemeinschaft
                                     user.Distance = Convert.ToDouble(entries[i][4]);
                                     end = true;
                                 }
-                                else if (Convert.ToInt32(entries[i][1]) != pw)
+                                else if (entries[i][1] != pw)
                                 {
                                     Console.Clear();
                                     Console.WriteLine("╔═══════════════════════════════════════════════╗\n" +
                                                       "║ Dein Passwort ist falsch, versuche es erneut. ║\n" +
                                                       "╚═══════════════════════════════════════════════╝");
                                     Thread.Sleep(1500);
-                                    goto EnterPW;
+                                    goto EnterID;
                                 }
                             }
                         }
@@ -537,15 +707,12 @@ namespace Fahrgemeinschaft
 
                             goto EnterID;
                         }
-
-
                     }
                     else if (entry == 1)
                     {
                         user = UserCreation.AskForUserInformation(user);
                         break;
-                    }
-               
+                    }               
                 }
             } while (!end);
 

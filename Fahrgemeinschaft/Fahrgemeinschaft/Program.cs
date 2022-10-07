@@ -23,8 +23,8 @@ namespace Fahrgemeinschaft
 
 
         static void Main(string[] args)
-        {            
-            UserCreation.CheckForCSVFile();           
+        {
+            UserCreation.CheckForCSVFile();
             App.CheckForCSVFile();
 
             UserCreation user = UserCreation.LogIn();
