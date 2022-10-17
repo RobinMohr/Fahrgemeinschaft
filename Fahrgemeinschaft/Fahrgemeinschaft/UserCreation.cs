@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Remoting.Messaging;
 using System.Runtime.Remoting.Services;
 using System.Text;
 using System.Threading;
@@ -16,73 +17,238 @@ namespace Fahrgemeinschaft
     public class UserCreation
     {
         public string Name { get; set; }
-        public string Direction { get; set; }
-        public double Distance { get; set; }
+        public string City { get; set; }
         public int ID { get; set; }
         public string PW { get; set; }
-        public bool Driver { get; set; }
 
         public override string ToString()
         {
-            return $"{ID};{PW};{Name};{Direction};{Distance}";
+            return $"{ID};{PW};{Name};{City}";
         }
 
-        public static void CheckForCSVFile()
+        public static void LogInOrRegister()
         {
-            Program program = new Program();
-            FileInfo fi = new FileInfo(program.PathUserData);
-            if (!fi.Exists)
+            UserCreation user = new UserCreation();
+            bool end = false;
+            do
             {
-                fi.Create();
-                var fileName = Assembly.GetExecutingAssembly().Location;
-                System.Diagnostics.Process.Start(fileName);
-                Environment.Exit(0);
+            LogInScreen:
+                Console.Clear();
+                Console.WriteLine("╔══════════════════════════════════════════════════════╗\n" +
+                                  "║ Möchtest du dich einloggen(0), oder registrieren(1)? ║\n" +
+                                  "╚══════════════════════════════════════════════════════╝");
+                ConsoleKeyInfo entry1 = Console.ReadKey();
+                if (entry1.Key == ConsoleKey.Escape)
+                {
+                    Environment.Exit(0);
+                }
+                if (!int.TryParse(Convert.ToString(entry1.KeyChar), out int entry) || entry < 0 || entry > 1)
+                {
+                    goto LogInScreen;
+                }
+                if (entry == 0)
+                {
+                    user = LogIn();
+                    end = true;
+                }
+                else if (entry == 1)
+                {
+                    user = UserCreation.AskForUserInformation(user);
+                    end = true;
+                }
+            } while (!end);
+            MainMenu.StartMenu(user);
+        }
+
+        public static UserCreation LogIn()
+        {
+            UserCreation user = new UserCreation();
+            int counter = 0;
+            List<string[]> listOfUsers = FileManager.ReadUserData();
+        EnterUserID:
+            (int userPos, int personID) = EnterUserID(user);
+        EnterPW:
+            if (counter != 0)
+            {
+                PrintLogIn(counter, Convert.ToString(personID));
             }
+            Console.SetCursorPosition(0, 10);
+
+            (string pw, int back) = EnterPassword();
+
+            if (back != 0)
+            {
+                goto EnterUserID;
+            }            
+            if (listOfUsers[userPos][1] == pw)
+            {
+                user.ID = Convert.ToInt32(listOfUsers[userPos][0]);
+                user.PW = listOfUsers[userPos][1];
+                user.Name = listOfUsers[userPos][2];
+                user.City = listOfUsers[userPos][3];
+            }
+            else if (listOfUsers[userPos][1] != pw)
+            {
+                counter++;
+
+                back = PasswordWasNotCool(counter);
+                if (back == 1)
+                {
+                    goto EnterUserID;
+
+                }
+                else if (back == 2)
+                {
+                    LogInOrRegister();
+                }
+                goto EnterPW;
+            }
+            return user;
+        }
+        private static void PrintLogIn(int counter, string ID)
+        {
+            if (counter != 0 || ID != null)
+            {
+                Console.Clear();
+                Console.WriteLine("╔══════════════════════════╗\n" +
+                                  "║ Bitte gebe deine ID ein: ║\n" +
+                                  "╚══════════════════════════╝\n" +
+                                  $"\n{ID}\n");
+                Console.WriteLine("╔═══════════════════════════════╗\n" +
+                                  "║ Bitte gebe dein Passwort ein: ║\n" +
+                                  "╚═══════════════════════════════╝\n");
+            }
+            else
+            {
+                Console.Clear();
+                Console.WriteLine("╔══════════════════════════╗\n" +
+                                  "║ Bitte gebe deine ID ein: ║\n" +
+                                  "╚══════════════════════════╝\n\n\n");
+                Console.WriteLine("╔═══════════════════════════════╗\n" +
+                                  "║ Bitte gebe dein Passwort ein: ║\n" +
+                                  "╚═══════════════════════════════╝\n");
+            }
+        }
+        public static (int, int) EnterUserID(UserCreation user)
+        {
+        WrongInput:
+            PrintLogIn(0, null);
+            Console.Write("→ ←");
+            Console.SetCursorPosition(1, 4);
+            (int personID, int back) = App.UserNumEntries();
+            if (back != 0)
+            {
+                LogInOrRegister();
+            }
+            user.ID = personID;
+
+
+            (int userPos, int counter) = FileManager.LookForUserInFile(user);
+            if (counter == 0)
+            {
+                WrongID();
+                goto WrongInput;
+            }
+            return (userPos, personID);
+        }
+        private static void WrongID()
+        {
+            Console.Clear();
+            Console.WriteLine("╔═══════════════════════════════════════════════╗\n" +
+                              "║ Diese ID existiert nicht. Versuche es erneut! ║\n" +
+                              "╚═══════════════════════════════════════════════╝");
+            Thread.Sleep(1500);
+        }
+        public static (string, int) EnterPassword()
+        {
+        WrongInput:
+
+            string password = "";
+            int back = 0;
+            ConsoleKeyInfo foo;
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write("→ ←");
+            Console.SetCursorPosition(1, Console.CursorTop);
+
+            do
+            {
+                foo = Console.ReadKey();
+
+                if (foo.Key == ConsoleKey.Enter)
+                {
+                    if (password.Length > 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        goto WrongInput;
+                    }
+                }
+                if (foo.Key == ConsoleKey.Escape)
+                {
+                    back++;
+                    break;
+                }
+
+                if (foo.Key == ConsoleKey.Backspace)
+                {
+                    if (password.Length != 0 && Console.CursorLeft >0)
+                    {
+                        Console.Write(' ');
+                        Console.Write(' ');
+                        Console.SetCursorPosition(Console.CursorLeft - 2, Console.CursorTop);
+
+                    }
+                    if (Console.CursorLeft == 0)
+                    {
+                        Console.Write("→");
+                    }
+                }
+
+                else if (foo.Key != ConsoleKey.Enter)
+                {
+                    Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+
+                    if (Convert.ToInt32(foo.KeyChar) != 0)
+                    {
+                        Console.Write('*');
+                        password += foo.KeyChar;
+                    }
+                }
+                Console.Write("←");
+                Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
+
+            } while (true);
+            return (password, back);
         }
 
         public static UserCreation AskForUserInformation(UserCreation user)
         {
-            Program program = new Program();
-
-            user = GetID(user);
-            user = CreatePW(user);
-            user = UserName(user);
-            user = UserDirection(user);
-            user = UserDistance(user);
-            //user.ToString();
-
+            user = GetUserData(user);
 
             string[] idc = new string[] { user.ToString() };
 
-            List<string[]> entries = new List<string[]>();
+            List<string[]> entries = FileManager.ReadUserData();
+            entries.Add(idc);
 
-            using (StreamReader sr = new StreamReader(program.PathUserData))
+
+            Console.Clear();
+            Console.WriteLine("╔═══════════════════════╗\n" +
+                              "║ Deine Daten sind nun: ║\n" +
+                              "╚═══════════════════════╝");
+            for (int i = 0; i < entries.Count; i++)
             {
-                while (!sr.EndOfStream)
-                {
-                    entries.Add(sr.ReadLine().Split(';'));
-                }
+                FileManager.WriteUserData(entries);
 
-                entries.Add(idc);
-            }
-            using (StreamWriter sw = new StreamWriter(program.PathUserData))
-            {
-                Console.Clear();
-                Console.WriteLine("╔═══════════════════════╗\n" +
-                                  "║ Deine Daten sind nun: ║\n" +
-                                  "╚═══════════════════════╝");
-                for (int i = 0; i < entries.Count; i++)
+                if (i == entries.Count - 1)
                 {
-                    sw.WriteLine(String.Join(";", entries[i]));
-
-                    if (i == entries.Count - 1)
-                    {
-                        Thread.Sleep(800);
-                        MainMenu.PrintingUserData(user);
-                        Console.ReadKey();
-                    }
+                    Thread.Sleep(800);
+                    MainMenu.PrintingUserData(user);
+                    Console.ReadKey();
                 }
             }
+
             do
             {
                 Console.Clear();
@@ -109,126 +275,216 @@ namespace Fahrgemeinschaft
             return user;
         }
 
-        //public static int UserDeclaration()
-        //{
-        //    int user = 9;
-        //    string eingabe;
-        //    bool richtig;
+        public static UserCreation GetUserData(UserCreation user)
+        {
+            user = GetID(user);
+            user = CreatePW(user);
+            user = UserName(user);
+            user.City = UserCity();
+            return user;
+        }
 
-        //    do
-        //    {
-        //        Console.Clear();
-
-        //        Console.WriteLine("Möchtest du selbst Fahren und jemanden mitnehmen oder möchtest du mitgenommen werden? \nZum selbst fahren bitte 'fahren' eingeben. \nZum mitgenommen werden bitte 'mitnehmen' eingeben.");
-        //        eingabe = Console.ReadLine();
-        //        eingabe.ToLower();
-
-        //        switch (eingabe)
-        //        {
-        //            case "fahren":
-        //                user = 0;
-        //                richtig = true;
-        //                break;
-
-        //            case "mitnehmen":
-        //                user = 1;
-        //                richtig = true;
-        //                break;
-
-        //            default:
-        //                Console.WriteLine("Bitte gebe etwas ein, was den Vorgaben entspricht.");
-        //                Thread.Sleep(500);
-        //                richtig = false;
-        //                break;
-        //        }
-
-        //    } while (!richtig);
-
-        //    return user;
-        //}
+        public static UserCreation CreatePW(UserCreation user)
+        {
+            Console.Clear();
+            Console.WriteLine("╔═══════════════════════════════════════════════════════════════════════════════════════════════╗\n" +
+                              "║ Bitte erstelle ein Passwort. Mit diesem und deiner ID kannst du dich später wieder einloggen. ║\n" +
+                              "╚═══════════════════════════════════════════════════════════════════════════════════════════════╝");
+            (string pw, int back) = EnterPassword();
+            user.PW = pw;
+            if (back != 0)
+            {
+                LogIn();
+            }
+            return user;
+        }
 
         public static UserCreation UserName(UserCreation user)
         {
-            do
+            Console.Clear();
+
+            Console.WriteLine("╔══════════════════════════════╗\n" +
+                              "║ Bitte gebe deinen Namen ein: ║\n" +
+                              "╚══════════════════════════════╝");
+            (string userName, int back) = App.UserStringEntry();
+            if (back != 0)
             {
-                Console.Clear();
-
-                Console.WriteLine("╔══════════════════════════════╗\n" +
-                                  "║ Bitte gebe deinen Namen ein: ║\n" +
-                                  "╚══════════════════════════════╝");
-                user.Name = Console.ReadLine();
-
-                if (user.Name == "")
-                {
-                    Console.Write("\nBitte gebe einen richtigen Namen ein.");
-                    Thread.Sleep(500);
-                    Console.Clear();
-                }
-                else
-                {
-                    break;
-                }
-            } while (true);
+                GetUserData(user);
+            }
+            user.Name = userName;
             return user;
         }
 
-        public static UserCreation UserDirection(UserCreation user)
+        public static string UserCity()
         {
-            do
+            WrongEntry:
+            Console.Clear();
+            Console.WriteLine("  ╔═══════════════════════════════════════════════════════╗\n" +
+                              "  ║ Welche der Aufgelisteten Städten ist dir am nächsten? ║\n" +
+                              "  ╠══════════════════════════╦════════════════════════════╝\n" +
+                              " 0╬    Weikersheim           ║\n" +
+                              "  ╟──────────────────────────╢\n" +
+                              " 1╬    Bad Mergentheim       ║\n" +
+                              "  ╟──────────────────────────╢\n" +
+                              " 2╬    Igersheim             ║\n" +
+                              "  ╟──────────────────────────╢\n" +
+                              " 3╬    Lauda-Königshofen     ║\n" +
+                              "  ╟──────────────────────────╢\n" +
+                              " 4╬    Boxberg               ║\n" +
+                              "  ╟──────────────────────────╢\n" +
+                              " 5╬    Assamstadt            ║\n" +
+                              "  ╟──────────────────────────╢\n" +
+                              " 6╬    Tauberrettersheim     ║\n" +
+                              "  ╟──────────────────────────╢\n" +
+                              " 7╬    Röttingen             ║\n" +
+                              "  ╟──────────────────────────╢\n" +
+                              " 8╬    Bieberehren           ║\n" +
+                              "  ╟──────────────────────────╢\n" +
+                              " 9╬    Creglingen            ║\n" +
+                              "  ╟──────────────────────────╢\n" +
+                              "10╬    Niederstetten         ║\n" +
+                              "  ╟──────────────────────────╢\n" +
+                              "11╬    Oberstetten           ║\n" +
+                              "  ╟──────────────────────────╢\n" +
+                              "12╬    Schrozberg            ║\n" +
+                              "  ╟──────────────────────────╢\n" +
+                              "13╬    Tauberbischofsheim    ║\n" +
+                              "  ╚══════════════════════════╝\n");
+            (int foo, int back) = App.UserNumEntries();
+            if (back != 0)
             {
-                Console.Clear();
 
-                Console.WriteLine("╔═════════════════════════════════════════════════════╗\n" +
-                                  "║ Aus welcher Richtung von Weikersheim aus kommst du? ║\n" +
-                                  "╚═════════════════════════════════════════════════════╝");
-                user.Direction = Console.ReadLine();
-
-                if (user.Direction == "")
-                {
-                    Console.WriteLine("Bitte gebe eine richtige Richtung ein.");
-                    Thread.Sleep(500);
-                }
-                else
-                {
-                    break;
-                }
-            } while (true);
-            return user;
+            }
+            string city = ConvertIntToCity(foo);
+            if (city == null)
+            {
+                goto WrongEntry;
+            }
+            return city;
         }
-
-        public static UserCreation UserDistance(UserCreation user)
+        public static string ConvertIntToCity(int foo)
         {
-            do
+            string baa;
+            switch (foo)
             {
-                Console.Clear();
-
-                Console.WriteLine("╔═════════════════════════════════════════════════════╗\n" +
-                                  "║ Wie weit wohnst du von Weikersheim aus weg? (in km) ║\n" +
-                                  "╚═════════════════════════════════════════════════════╝");
-                user.Distance = Convert.ToDouble(Console.ReadLine());
-
-                if (user.Distance <= 0 || user.Distance > 500)
-                {
-                    Console.WriteLine("╔════════════════════════════════════════════════════════════╗\n" +
-                                      "║ Die Zahl darf nicht kleiner als 0 und größer als 500 sein. ║\n" +
-                                      "╚════════════════════════════════════════════════════════════╝");
-                    Thread.Sleep(500);
-                }
-                else
-                {
+                case 0:
+                    baa = "Weikersheim";
                     break;
-                }
-            } while (true);
-            return user;
+                case 1:
+                    baa = "Bad Mergentheim";
+                    break;
+                case 2:
+                    baa = "Igersheim";
+                    break;
+                case 3:
+                    baa = "Lauda-Königshofen";
+                    break;
+                case 4:
+                    baa = "Boxberg";
+                    break;
+                case 5:
+                    baa = "Assamstadt";
+                    break;
+                case 6:
+                    baa = "Tauberrettersheim";
+                    break;
+                case 7:
+                    baa = "Röttingen";
+                    break;
+                case 8:
+                    baa = "Bieberehren";
+                    break;
+                case 9:
+                    baa = "Creglingen";
+                    break;
+                case 10:
+                    baa = "Niederstetten";
+                    break;
+                case 11:
+                    baa="Oberstetten";
+                    break;
+                case 12:
+                    baa = "Schrozberg";
+                    break;
+                case 13:
+                    baa = "Tauberbischofsheim";
+                    break;
+                default:
+                    baa = null;
+                    break;
+            }
+            return baa;
+        }
+        public static int ConvertCityToInt(string baa)
+        {
+            int foo;
+            switch (baa)
+            {
+                case "Weikersheim":
+                    foo = 0;
+                    break;
+
+                case "Bad Mergentheim":
+                    foo = 1;
+                    break;
+
+                case "Igersheim":
+                    foo = 2;
+                    break;
+
+                case "Lauda-Königshofen":
+                    foo = 3;
+                    break;
+
+                case "Boxberg":
+                    foo = 4;
+                    break;
+
+                case "Assamstadt":
+                    foo = 5;
+                    break;
+
+                case "Tauberrettersheim":
+                    foo = 6;
+                    break;
+
+                case "Röttingen":
+                    foo = 7;
+                    break;
+
+                case "Bieberehren":
+                    foo = 8;
+                    break;
+
+                case "Creglingen":
+                    foo = 9;
+                    break;
+
+                case "Niederstetten":
+                    foo = 10;
+                    break;
+                case "Oberstetten":
+                    foo = 11;
+                    break;
+                case "Schrozberg":
+                    foo = 12;
+                    break;
+                case "Tauberbischofsheim":
+                    foo = 13;
+                    break;
+                default:
+                    foo = 0;
+                    break;
+            }
+            return foo;
         }
 
         public static UserCreation GetID(UserCreation user)
         {
-            Program program = new Program();
-
+            FileManager fileManager = new FileManager();
             List<string[]> entries = new List<string[]>();
 
-            using (StreamReader sr = new StreamReader(program.PathUserData))
+            using (StreamReader sr = new StreamReader(fileManager.PathUserData))
             {
                 while (!sr.EndOfStream)
                 {
@@ -244,53 +500,14 @@ namespace Fahrgemeinschaft
             return user;
         }
 
-        public static UserCreation CreatePW(UserCreation user)
-        {
-            Console.Clear();
-            Console.WriteLine("╔═══════════════════════════════════════════════════════════════════════════════════════════════╗\n" +
-                              "║ Bitte erstelle ein Passwort. Mit diesem und deiner ID kannst du dich später wieder einloggen. ║\n" +
-                              "╚═══════════════════════════════════════════════════════════════════════════════════════════════╝");
-            string password = "";
-            ConsoleKeyInfo keyInfo;
-
-            do
-            {
-                keyInfo = Console.ReadKey();
-
-                if (keyInfo.Key == ConsoleKey.Backspace)
-                {
-                    if (password.Length != 0)
-                    {
-                        Console.Write(' ');
-                        Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                        password = password.Substring(0, password.Length - 1);
-                    }                    
-                }
-                else if (keyInfo.Key != ConsoleKey.Enter)
-                {
-                    Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-
-                    if (Convert.ToInt32(keyInfo.KeyChar) != 0)
-                    {
-                        Console.Write('*');
-                        password += keyInfo.KeyChar;
-                    }
-                }
-
-            } while (keyInfo.Key != ConsoleKey.Enter && password.Length < 33);
-
-            user.PW = password;
-
-            return user;
-        }
-
         public static UserCreation ChangeData(UserCreation user)
         {
-            Program program = new Program();
-
+            FileManager fileManager = new FileManager();
             do
             {
-            ChangeData:
+                do
+                {
+                ChangeData:
 
                 Console.Clear();
 
@@ -303,198 +520,31 @@ namespace Fahrgemeinschaft
                                 " ╟────────────────────────────╢\n" +
                                 "2╬            Name            ║\n" +
                                 " ╟────────────────────────────╢\n" +
-                                "3╬          Richtung          ║\n" +
-                                " ╟────────────────────────────╢\n" +
-                                "4╬         Entfernung         ║\n" +
-                                " ╚════════════════════════════╝\n");
-
-                int entry;
-                ConsoleKeyInfo userInput = Console.ReadKey();
-
-                if (char.IsDigit(userInput.KeyChar))
-                {
-                    entry = int.Parse(userInput.KeyChar.ToString());
-
-                    if (entry > 4 || entry <= 0)
+                                "3╬            Stadt           ║\n" +                                
+                                " ╚════════════════════════════╝\n");                                    
+                    ConsoleKeyInfo entry = Console.ReadKey();
+                    switch (Convert.ToInt32(Convert.ToString(entry.KeyChar)))
                     {
+                        case 1:
+                            string pw = ChangePW(user);
+                            if ( pw == "1")
+                            {
+                                goto ChangeData;
+                            }
+                            user.PW = pw;
+                            break;
+                        case 2:
+                            user = UserName(user);
+                            goto ChangeAnother;
+                        case 3:
+                            user.City = UserCity();
+                            break;
+                        default:
+                            break;
                     }
-                    else
-                    {
-                        switch (entry)
-                        {
-                            case 1:
-
-                                int misses1 = 0;
-                                int misses2 = 0;
-
-                                string old_pw = user.PW;
-
-                            EnterOldPW:
-
-                                Console.Clear();
-                                Console.WriteLine("╔═════════════════════════════════════╗\n" +
-                                                  "║ Bitte gebe dein altes Passwort ein: ║\n" +
-                                                  "╚═════════════════════════════════════╝");
-                                string password = "";
-                                ConsoleKeyInfo keyInfo;
-
-                                do
-                                {
-                                    keyInfo = Console.ReadKey();
-
-                                    if (keyInfo.Key == ConsoleKey.Backspace)
-                                    {
-                                        if (password.Length != 0)
-                                        {
-                                            Console.Write(' ');
-                                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                                            password = password.Substring(0, password.Length - 1);
-                                        }
-                                    }
-                                    else if (keyInfo.Key != ConsoleKey.Enter)
-                                    {
-                                        Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-
-                                        if (Convert.ToInt32(keyInfo.KeyChar) != 0)
-                                        {
-                                            Console.Write('*');
-                                            password += keyInfo.KeyChar;
-                                        }
-                                    }
-
-                                } while (keyInfo.Key != ConsoleKey.Enter && password.Length < 33);
-
-
-                                if (old_pw == password)
-                                {
-                                EnterNewPW:
-
-                                    Console.Clear();
-                                    Console.WriteLine("╔═════════════════════════════════════╗\n" +
-                                                      "║ Bitte gebe dein neues Passwort ein: ║\n" +
-                                                      "╚═════════════════════════════════════╝");
-
-                                    string new_password = "";
-                                    ConsoleKeyInfo keyInfo1;
-
-                                    do
-                                    {
-                                        keyInfo1 = Console.ReadKey();
-
-                                        if (keyInfo1.Key == ConsoleKey.Backspace)
-                                        {
-                                            if (new_password.Length != 0)
-                                            {
-                                                Console.Write(' ');
-                                                Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                                                new_password = new_password.Substring(0, new_password.Length - 1);
-                                            }
-                                        }
-                                        else if (keyInfo1.Key != ConsoleKey.Enter)
-                                        {
-                                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-
-                                            if (Convert.ToInt32(keyInfo1.KeyChar) != 0)
-                                            {
-                                                Console.Write('*');
-                                                new_password += keyInfo1.KeyChar;
-                                            }
-                                        }
-
-                                    } while (keyInfo1.Key != ConsoleKey.Enter && new_password.Length < 33);
-
-                                ConfirmNewPW:
-
-                                    Console.Clear();
-                                    Console.WriteLine("╔═════════════════════════════════════╗\n" +
-                                                      "║    Bitte bestätige dein Passwort    ║\n" +
-                                                      "╚═════════════════════════════════════╝");
-
-                                    string password2 = "";
-                                    ConsoleKeyInfo keyInfo2;
-
-                                    do
-                                    {
-                                        keyInfo2 = Console.ReadKey();
-
-                                        if (keyInfo2.Key == ConsoleKey.Backspace)
-                                        {
-                                            if (password2.Length != 0)
-                                            {
-                                                Console.Write(' ');
-                                                Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                                                password2 = password2.Substring(0, password2.Length - 1);
-                                            }
-                                        }
-                                        else if (keyInfo2.Key != ConsoleKey.Enter)
-                                        {
-                                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-
-                                            if (Convert.ToInt32(keyInfo2.KeyChar) != 0)
-                                            {
-                                                Console.Write('*');
-                                                password2 += keyInfo2.KeyChar;
-                                            }
-                                        }
-
-                                    } while (keyInfo2.Key != ConsoleKey.Enter && password2.Length < 33);
-
-                                    if (password2 == new_password)
-                                    {
-                                        user.PW = new_password;
-                                    }
-                                    else
-                                    {
-                                        misses2++;
-                                        if (misses2 % 5 == 0)
-                                        {
-                                            goto ConfirmNewPW;
-                                        }
-                                        else if (misses2 % 3 == 0)
-                                        {
-                                            goto EnterNewPW;
-                                        }
-
-                                    }
-                                }
-                                else
-                                {
-                                    misses1++;
-                                    if (misses1 == 3)
-                                    {
-
-                                    }
-                                    goto EnterOldPW;
-                                }
-                                goto ChangeAnother;
-                            case 2:
-                                Console.Clear();
-                                Console.WriteLine("╔════════════════════════════════╗\n" +
-                                                  "║ Wie soll dein neuer Name sein? ║\n" +
-                                                  "╚════════════════════════════════╝");
-                                user.Name = Console.ReadLine();
-
-                                goto ChangeAnother;
-                            case 3:
-                                Console.Clear();
-                                Console.WriteLine("╔════════════════════════════════════════════════════╗\n" +
-                                                  "║ In welcher Richtung von Weikersheim aus wohnst du? ║\n" +
-                                                  "╚════════════════════════════════════════════════════╝");
-                                user.Direction = Console.ReadLine();
-                                goto ChangeAnother;
-                            case 4:
-                                Console.Clear();
-                                Console.WriteLine("╔══════════════════════════════════════════════╗\n" +
-                                                  "║ Wie weit wwohnst du von Weikersheim aus weg? ║\n" +
-                                                  "╚══════════════════════════════════════════════╝");
-                                user.Distance = Convert.ToDouble(Console.ReadLine());
-                                goto ChangeAnother;
-                            default:
-                                break;
-                        }
-                        break;
-                    }
-                }
+                    break;
+                } while (true);
+                
 
 
             ChangeAnother:
@@ -504,7 +554,7 @@ namespace Fahrgemeinschaft
                                   "║ Deine neuen Daten sind: ║\n" +
                                   "╚═════════════════════════╝");
 
-                Thread.Sleep(300);
+                Thread.Sleep(1500);
                 MainMenu.PrintingUserData(user);
 
                 Console.WriteLine("╔══════════════════════════════════════╗\n" +
@@ -515,38 +565,28 @@ namespace Fahrgemeinschaft
                 string entry1 = Convert.ToString(entry2.KeyChar);
                 entry1.ToLower();
 
-                if (entry1 == "y") { goto ChangeData; }
+                if (entry1 == "y") { goto ChangeAnother; }
 
                 else if (entry1 == "n")
                 {
-                    List<string[]> entries = new List<string[]>();
-
-                    using (StreamReader sr = new StreamReader(program.PathUserData))
-                    {
-                        while (!sr.EndOfStream)
+                    List<string[]> entries = FileManager.ReadUserData();
+                    int i = 0;
+                        foreach(var entry in entries)
                         {
-                            entries.Add(sr.ReadLine().Split(';'));
-                        }
-
-                        for (int i = 0; i == entries.Count; i++)
-                        {
-                            if (Convert.ToInt32(entries[0][i]) == user.ID)
+                            if (Convert.ToInt32(entries[i][0]) == user.ID)
                             {
-                                entries[1][i] = user.PW;
-                                entries[2][i] = user.Name;
-                                entries[3][i] = user.Direction;
-                                entries[4][i] = Convert.ToString(user.Distance);
+                                entries[i][1] = user.PW;
+                                entries[i][2] = user.Name;
+                                entries[i][3] = user.City;
                             }
-                        }
+                            else
+                            {
+                                Console.WriteLine("USER ID KAPUT");
+                                Console.ReadLine();
+                            }
+                        i++;                        
                     }
-                    using (StreamWriter sw = new StreamWriter(program.PathUserData))
-                    {
-                        Console.Clear();
-                        for (int i = 0; i < entries.Count; i++)
-                        {
-                            sw.WriteLine(String.Join(";", entries[i]));
-                        }
-                    }
+                    FileManager.WriteUserData(entries);
                     break;
                 }
 
@@ -555,168 +595,117 @@ namespace Fahrgemeinschaft
             return user;
         }
 
-        public static UserCreation LogIn()
+        public static string ChangePW(UserCreation user)
         {
-            Program program = new Program();
-            UserCreation user = new UserCreation();
-            List<string[]> entries = new List<string[]>();
+            int misses1 = 0;
+            int misses2 = 0;
+        EnterOldPW:
 
-            bool end = false;
-
-
-            do
+            Console.Clear();
+            Console.WriteLine("╔═════════════════════════════════════╗\n" +
+                              "║ Bitte gebe dein altes Passwort ein: ║\n" +
+                              "╚═════════════════════════════════════╝");
+            (string pw, int back) = EnterPassword();
+            if (back != 0)
             {
-                LogInScreen:
+                return "1";
+            }
+            if (user.PW == pw)
+            {
+            EnterNewPW:
+
                 Console.Clear();
-
-                Console.WriteLine("╔══════════════════════════════════════════════════════╗\n" +
-                                  "║ Möchtest du dich einloggen(0), oder registrieren(1)? ║\n" +
-                                  "╚══════════════════════════════════════════════════════╝");
-                ConsoleKeyInfo userInput = Console.ReadKey();
-
-                if (char.IsDigit(userInput.KeyChar))
+                Console.WriteLine("╔═════════════════════════════════════╗\n" +
+                                  "║ Bitte gebe dein neues Passwort ein: ║\n" +
+                                  "╚═════════════════════════════════════╝");
+                (string newPassword, int back3) = EnterPassword();
+                if (back3 != 0)
                 {
-                    int entry = int.Parse(userInput.KeyChar.ToString());
-                    if (entry < 0 || entry >= 2)
-                    {
-                       goto LogInScreen;
-                    }
-                        
-                    else if (entry == 0)
-                    {
-                    EnterID:
-
-
-                        using (StreamReader sr = new StreamReader(program.PathUserData))
-                        {
-                            while (!sr.EndOfStream)
-                            {
-                                entries.Add(sr.ReadLine().Split(';'));
-                            }
-                        }
-
-                        Console.Clear();
-
-                        Console.WriteLine("╔══════════════════════════╗\n" +
-                                          "║ Bitte gebe deine ID ein: ║\n" +
-                                          "╚══════════════════════════╝\n\n\n");
-                        Console.WriteLine("╔═══════════════════════════════╗\n" +
-                                          "║ Bitte gebe dein Passwort ein: ║\n" +
-                                          "╚═══════════════════════════════╝\n\n");
-
-                        string id = "";
-                        ConsoleKeyInfo Key;
-
-                        Console.SetCursorPosition(0, 4);
-                        do
-                        {
-                            Key = Console.ReadKey();
-                            if (Key.Key == ConsoleKey.Backspace && id.Length !=0)
-                            {
-                                Console.Write(' ');
-                                Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                                id = id.Substring(0, id.Length - 1);
-                            }
-
-                            else if (Key.Key != ConsoleKey.Enter)
-                            {
-                                id += Key.KeyChar;
-                            }
-
-                            if (Key.Key == ConsoleKey.Enter && id.Length == 0)
-                            {
-                                goto LogInScreen;
-                            }
-                            
-                        } while (Key.Key != ConsoleKey.Enter);
-
-
-                        //Console.Clear();
-                        int counter = 0;
-
-                        for (int i = 0; i < entries.Count; i++)
-                        {
-                            if (entries[i][0] == id)
-                            {
-                                counter++;
-    
-                                string pw = "";
-                                ConsoleKeyInfo keyInfo;
-                                
-                                Console.SetCursorPosition(0, 10);
-
-                                do
-                                {
-                                    keyInfo = Console.ReadKey();
-
-                                    if (keyInfo.Key == ConsoleKey.Enter && pw.Length == 0)
-                                    {
-                                        goto LogInScreen;
-                                    }
-
-                                    if (keyInfo.Key == ConsoleKey.Backspace)
-                                    {
-                                        if (pw.Length != 0)
-                                        {
-                                            Console.Write(' ');
-                                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                                            pw = pw.Substring(0, pw.Length - 1);
-                                        }
-                                    }
-                                    else if (keyInfo.Key != ConsoleKey.Enter)
-                                    {
-
-                                        if (Convert.ToInt32(keyInfo.KeyChar) != 0)
-                                        {
-                                            Console.SetCursorPosition(Console.CursorLeft - 1, Console.CursorTop);
-                                            Console.Write('*');
-                                            pw += keyInfo.KeyChar;
-                                        }
-                                    }
-
-                                } while (keyInfo.Key != ConsoleKey.Enter && pw.Length < 33);
-
-                                if (entries[i][1] == pw)
-                                {
-                                    user.ID = Convert.ToInt32(entries[i][0]);
-                                    user.PW = entries[i][1];
-                                    user.Name = entries[i][2];
-                                    user.Direction = entries[i][3];
-                                    user.Distance = Convert.ToDouble(entries[i][4]);
-                                    end = true;
-                                }
-                                else if (entries[i][1] != pw)
-                                {
-                                    Console.Clear();
-                                    Console.WriteLine("╔═══════════════════════════════════════════════╗\n" +
-                                                      "║ Dein Passwort ist falsch, versuche es erneut. ║\n" +
-                                                      "╚═══════════════════════════════════════════════╝");
-                                    Thread.Sleep(1500);
-                                    goto EnterID;
-                                }
-                            }
-                        }
-
-                        if (counter == 0)
-                        {
-                            Console.Clear();
-                            Console.WriteLine("╔════════════════════════════════════════════════════╗\n" +
-                                              "║ Deine ID wurde nicht gefunden. Versuche es erneut! ║\n" +
-                                              "╚════════════════════════════════════════════════════╝");
-                            Thread.Sleep(1500);
-
-                            goto EnterID;
-                        }
-                    }
-                    else if (entry == 1)
-                    {
-                        user = UserCreation.AskForUserInformation(user);
-                        break;
-                    }               
+                    goto EnterOldPW;
                 }
-            } while (!end);
+                if (user.PW == newPassword)
+                {
+                    Console.WriteLine("╔══════════════════════════════════════════════════════════╗\n" +
+                                      "║ Dein neues Passwort darf nicht dein altes Passwort sein. ║\n" +
+                                      "╚══════════════════════════════════════════════════════════╝");
+                    Thread.Sleep(1500);
+                    goto EnterNewPW;
+                }
 
-            return user;
+            ConfirmNewPW:
+
+                Console.Clear();
+                Console.WriteLine("╔═════════════════════════════════════╗\n" +
+                                  "║    Bitte bestätige dein Passwort    ║\n" +
+                                  "╚═════════════════════════════════════╝");
+                (string newPassword1, int back2) = EnterPassword();
+                if (back2 != 0)
+                {
+                    goto EnterNewPW;
+                }
+                if (newPassword == newPassword1)
+                {
+                    return newPassword;
+                }
+                else
+                {
+                    misses2++;
+                    PasswordWasNotCool(misses2);
+                    goto ConfirmNewPW;
+                }
+            }
+            else
+            {
+                misses1++;
+                back = PasswordWasNotCool(misses1);
+                if (back == 2)
+                {
+                    return "1";
+                }
+                goto EnterOldPW;
+            }
+        }       
+
+        public static int PasswordWasNotCool(int counter)
+        {
+            int back = 0;
+            Console.Clear();
+            if (counter % 3 == 0)
+            {
+                Console.WriteLine("╔═════════════════════════════════════════════════════╗\n" +
+                                  "║ Dein Passwort ist falsch, du wirst zurückgeleitet!  ║\n" +
+                                  "╚═════════════════════════════════════════════════════╝\n");
+                back = 1;
+            }
+
+            if (counter % 5 == 0)
+            {
+                Console.WriteLine("╔════════════════════════════════════════════════════════════╗\n" +
+                                  "║ Dein Passwort war zu oft falsch, du wirst zurückgeleitet!  ║\n" +
+                                  "╚════════════════════════════════════════════════════════════╝\n");
+                back = 2;
+            }
+            else
+            {
+                Console.WriteLine("╔════════════════════════════════════════════════╗\n" +
+                                  "║ Dein Passwort ist falsch, versuche es erneut!  ║\n" +
+                                  "╚════════════════════════════════════════════════╝\n");
+            }
+
+            Thread.Sleep(1500);
+            return back;
         }
+        //public static void PasswordWrongTooOften()
+        //{
+        //    Console.Clear();
+        //    Console.WriteLine("╔═══════════════════════════════════════════════════════════╗\n" +
+        //                      "║ Dein Passwort war zu oft Falsch, du wirst zurückgeleitet. ║\n" +
+        //                      "╚═══════════════════════════════════════════════════════════╝");
+        //    Thread.Sleep(1500);
+        //}
+
+
+
     }
 }
+

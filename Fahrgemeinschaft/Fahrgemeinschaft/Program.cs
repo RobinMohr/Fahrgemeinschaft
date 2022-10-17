@@ -11,34 +11,18 @@ namespace Fahrgemeinschaft
 {
     public class Program
     {
-        public string PathUserData { get; }
-        public string PathRouteData { get; }
-
-
-        public Program()
-        {
-            PathUserData = @"C:\010Pojects\020Fahrgemeinschaft\UserInformation.csv";
-            PathRouteData = @"C:\010Pojects\020Fahrgemeinschaft\DrivingInformation.csv";
-        }
-
-
         static void Main(string[] args)
         {
-            UserCreation.CheckForCSVFile();
-            App.CheckForCSVFile();
+            List<int> intermediate = new List<int> {11,2,6};
+            int start = 0;
+            int end = 10 ;
+            FileManager.CheckAllFiles();
 
-            UserCreation user = UserCreation.LogIn();
+            Console.WriteLine(Maps.Calculate(start, end, intermediate));
+            Console.ReadLine();
 
-            MainMenu.StartMenu(user);
-
-
-
-
-
-
-
-
-            Console.ReadKey();
+            FileManager.CheckAllFiles();
+            UserCreation.LogInOrRegister();
         }
     }
 }

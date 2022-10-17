@@ -12,96 +12,31 @@ namespace Fahrgemeinschaft
     {
         public static void StartMenu(UserCreation user)
         {
-            do
-            {
-                MainMenu:
-                Console.Clear();
 
-                Console.Write("\n ╔════════════════════════════╗\n" +
-                                " ║                            ║\n" +
-                                " ║ Hauptmenü Fahrgemeinschaft ║\n" +
-                                " ║                            ║\n" +
-                                " ╠════════════════════════════╣\n" +
-                                "1╬  Fahrgemeinschaft planen:  ║\n" +
-                                " ╟────────────────────────────╢\n" +
-                                "2╬  Fahrgemeinschaft suchen:  ║\n" +
-                                " ╟────────────────────────────╢\n" +
-                                "3╬  meine Fahrten verwalten:  ║\n" +
-                                " ╟────────────────────────────╢\n" +
-                                "4╬  Fahrten und Suchanzeigen  ║\n" +
-                                " ╟────────────────────────────╢\n" +
-                                "5╬    Nutzerdaten ausgeben    ║\n" +
-                                " ╟────────────────────────────╢\n" +
-                                "6╬     Nutzerdaten ändern     ║\n" +
-                                " ╟────────────────────────────╢\n" +
-                                "7╬         ausloggen          ║\n" +
-                                " ╚════════════════════════════╝\n");
 
-               
+            Console.Clear();
 
-                int entry;
-                ConsoleKeyInfo userInput = Console.ReadKey();
-
-                if (char.IsDigit(userInput.KeyChar))
-                {
-                    entry = int.Parse(userInput.KeyChar.ToString());
-
-                    if (entry > 8 || entry <= 0)
-                    {
-                    }
-                    else
-                    {
-                        switch (entry)
-                        {
-                            case 1:
-
-                                App.Planning(user);
-                                goto MainMenu;
-
-                            case 2:
-
-                                App.Joining(user);
-                                goto MainMenu;
-
-                            case 3:
-
-                                App.Change(user);
-                                goto MainMenu;
-
-                            case 4:
-                                App.AllData(user);
-                                goto MainMenu;
-
-                            case 5:
-
-                                PrintingUserData(user);
-
-                                Console.ReadKey();
-                                goto MainMenu;
-
-                            case 6:
-                                user = UserCreation.ChangeData(user);
-                                goto MainMenu;
-
-                            case 7:
-
-                                var fileName = Assembly.GetExecutingAssembly().Location;
-                                System.Diagnostics.Process.Start(fileName);
-
-                                Environment.Exit(0);
-                                goto MainMenu;
-
-                            default:
-                                break;
-                        }
-                        break;
-                    }
-                }
-            } while (true);
-
-            Console.ReadKey();
+            Console.Write("\n ╔════════════════════════════╗\n" +
+                            " ║                            ║\n" +
+                            " ║ Hauptmenü Fahrgemeinschaft ║\n" +
+                            " ║                            ║\n" +
+                            " ╠════════════════════════════╣\n" +
+                            "1╬  Fahrgemeinschaft planen:  ║\n" +
+                            " ╟────────────────────────────╢\n" +
+                            "2╬  Fahrgemeinschaft suchen:  ║\n" +
+                            " ╟────────────────────────────╢\n" +
+                            "3╬  meine Fahrten verwalten:  ║\n" +
+                            " ╟────────────────────────────╢\n" +
+                            "4╬  Fahrten und Suchanzeigen  ║\n" +
+                            " ╟────────────────────────────╢\n" +
+                            "5╬    Nutzerdaten ausgeben    ║\n" +
+                            " ╟────────────────────────────╢\n" +
+                            "6╬     Nutzerdaten ändern     ║\n" +
+                            " ╟────────────────────────────╢\n" +
+                            "7╬         ausloggen          ║\n" +
+                            " ╚════════════════════════════╝\n");
+            MainMenuMethod(user);
         }
-
         public static void PrintingUserData(UserCreation user)
         {
             int most = 0;
@@ -116,16 +51,14 @@ namespace Fahrgemeinschaft
 
 
             string name = Convert.ToString(user.Name);
-            string direction = Convert.ToString(user.Direction);
-            string distance = Convert.ToString(user.Distance);
+            string city = Convert.ToString(user.City);
 
             int amountID = 7 + id.Count(),
                  amountPW = 7 + pw.Count(),
                  amountName = 9 + name.Count(),
-                 amountDirection = 13 + direction.Count(),
-                 amountDistance = 15 + distance.Count();
+                 amountCity = 10 + city.Count();
 
-            List<int> amounts = new List<int> { amountID, amountPW, amountName, amountDirection, amountDistance };
+            List<int> amounts = new List<int> { amountID, amountPW, amountName, amountCity };
 
             foreach (int amount in amounts)
             {
@@ -135,9 +68,9 @@ namespace Fahrgemeinschaft
                 }
             }
 
-            string[,] userData = new string[15,most];
+            string[,] userData = new string[13, most];
 
-            for (int j = 0; j < 15; j++)
+            for (int j = 0; j < 13; j++)
             {
                 for (int i = 0; i < most; i++)
                 {
@@ -159,7 +92,7 @@ namespace Fahrgemeinschaft
 
                     else if (j == 2)
                     {
-                        string DATA = "Nutzerdaten:".PadLeft( 12/2 + most/2);
+                        string DATA = "Nutzerdaten:".PadLeft(12 / 2 + most / 2);
                         DATA = DATA.PadRight(most);
 
                         List<char> chars = new List<char>();
@@ -173,9 +106,6 @@ namespace Fahrgemeinschaft
                             userData[j, i] = Convert.ToString(chars[i]);
                         }
                     }
-
-
-
                     else if (j == 5)
                     {
                         string id_ = $"ID:{user.ID}".PadRight((id.Count() + 3) / 2 + most / 2);
@@ -231,12 +161,12 @@ namespace Fahrgemeinschaft
 
                     else if (j == 11)
                     {
-                        string direction_ = $" Richtung:{user.Direction}".PadLeft((direction.Count() + 9) / 2 + most / 2);
-                        direction_ = direction_.PadRight(most - 4);
+                        string city_ = $" Stadt:{user.City}".PadLeft((city.Count() + 9) / 2 + most / 2);
+                        city_ = city_.PadRight(most - 4);
 
                         List<char> chars = new List<char>();
 
-                        foreach (char x in direction_)
+                        foreach (char x in city_)
                         {
                             chars.Add(x);
                         }
@@ -246,55 +176,38 @@ namespace Fahrgemeinschaft
                             userData[j, i] = Convert.ToString(chars[i]);
                         }
                     }
-                    else if (j == 13)
-                    {
-                        string distance_ = $" Entfernung:{user.Distance}".PadLeft((distance.Count() + 11) / 2 + most / 2);
-                        distance_.PadRight(most - 4);
-
-                        List<char> chars = new List<char>();
-
-                        foreach (char x in distance_)
-                        {
-                            chars.Add(x);
-                        }
-
-                        if (i < chars.Count)
-                        {
-                            userData[j, i] = Convert.ToString(chars[i]);
-                        }
-                    
-                    }
-                    if (j == 14)
+                   
+                    if (j == 12)
                     {
                         if (i == 0)
                         {
-                            userData[j,i] = "╚";
+                            userData[j, i] = "╚";
                         }
                         else if (i == most - 1)
                         {
-                            userData[j,i] = "╝";
+                            userData[j, i] = "╝";
                         }
                         else
                         {
-                            userData[j,i] = "═";
+                            userData[j, i] = "═";
                         }
                     }
                     if (j == 4)
                     {
                         if (i == 0)
                         {
-                            userData[j,i] = "╠";
+                            userData[j, i] = "╠";
                         }
                         else if (i == most - 1)
                         {
-                            userData[j,i] = "╣";
+                            userData[j, i] = "╣";
                         }
                         else
                         {
-                            userData[j,i] = "═";
+                            userData[j, i] = "═";
                         }
                     }
-                    if (j == 6 || j == 8 || j == 10 || j == 12)
+                    if (j == 6 || j == 8 || j == 10 )
                     {
                         if (i == 0)
                         {
@@ -312,7 +225,7 @@ namespace Fahrgemeinschaft
 
                     else if (i == 0 || i == most - 1)
                     {
-                        if (userData[j, i] != "╢" && userData[j, i] != "╟"&& userData[j, i] != "╝"&& userData[j, i] != "╚"&& userData[j, i] != "╔"&& userData[j, i] != "╗"&& userData[j, i] != "╣"&& userData[j, i] != "╠")
+                        if (userData[j, i] != "╢" && userData[j, i] != "╟" && userData[j, i] != "╝" && userData[j, i] != "╚" && userData[j, i] != "╔" && userData[j, i] != "╗" && userData[j, i] != "╣" && userData[j, i] != "╠")
                         {
                             userData[j, i] = "║";
                         }
@@ -326,15 +239,80 @@ namespace Fahrgemeinschaft
             }
             Console.Clear();
 
-            for (int j = 0; j < 15; j++)
+            for (int j = 0; j < 13; j++)
             {
                 for (int i = 0; i < most; i++)
                 {
-                    Console.Write(userData[j,i]);
+                    Console.Write(userData[j, i]);
                     Console.ForegroundColor = ConsoleColor.White;
                 }
                 Console.Write("\n");
             }
         }
+        public static void MainMenuMethod(UserCreation user)
+        {
+            do
+            {
+                int entry;
+                ConsoleKeyInfo userInput = Console.ReadKey();
+
+                if (userInput.Key == ConsoleKey.Escape)
+                {
+                    Environment.Exit(0);
+                }
+
+                if (char.IsDigit(userInput.KeyChar))
+                {
+                    entry = int.Parse(userInput.KeyChar.ToString());
+
+                    if (entry > 8 || entry <= 0)
+                    {
+                    }
+                    else
+                    {
+                        switch (entry)
+                        {
+                            case 1:
+
+                                CarPool.Planning(user);
+                                StartMenu(user);
+                                break;
+                            case 2:
+
+                                CarPool.Joining(user);
+                                StartMenu(user);
+                                break;
+                            case 3:
+
+                                CarPool.Change(user);
+                                StartMenu(user);
+                                break;
+                            case 4:
+                                FileManager.AllData(user);
+                                StartMenu(user);
+                                break;
+                            case 5:
+                                PrintingUserData(user);
+                                Console.ReadKey();
+                                StartMenu(user);
+                                break;
+                            case 6:
+                                user = UserCreation.ChangeData(user);
+                                StartMenu(user);
+                                break;
+                            case 7:
+                                var fileName = Assembly.GetExecutingAssembly().Location;
+                                System.Diagnostics.Process.Start(fileName);
+                                Environment.Exit(0);
+                                StartMenu(user);
+                                break;
+                            default:
+                                App.ResetCursor();
+                                break;
+                        }
+                    }
+                }
+            } while (true);
+        }       
     }
 }

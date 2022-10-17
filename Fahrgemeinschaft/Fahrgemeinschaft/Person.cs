@@ -12,13 +12,13 @@ namespace Fahrgemeinschaft
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public bool Driver { get; set; }
+        public int Driver { get; set; }
         public int Amount { get; set; }
         public int Free_Spaces { get; set; }
         public string[] Time { get; set; }
         
 
-        public Person(bool driver, string name, int amount, int free_spaces, string[] time)
+        public Person(int driver, string name, int amount, int free_spaces, string[] time)
         {
             this.Driver = driver;
             this.Name = name;

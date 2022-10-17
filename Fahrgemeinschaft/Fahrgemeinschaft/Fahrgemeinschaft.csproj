@@ -44,6 +44,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <Compile Include="CarPool.cs" />
+    <Compile Include="FileManager.cs" />
+    <Compile Include="Lmaoo.cs" />
     <Compile Include="MainMenu.cs" />
     <Compile Include="Maps.cs" />
     <Compile Include="Person.cs" />
