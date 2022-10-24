@@ -265,7 +265,7 @@ namespace Fahrgemeinschaft
                 {
                     entry = int.Parse(userInput.KeyChar.ToString());
 
-                    if (entry > 8 || entry <= 0)
+                    if (entry >= 8 || entry <= 0)
                     {
                     }
                     else

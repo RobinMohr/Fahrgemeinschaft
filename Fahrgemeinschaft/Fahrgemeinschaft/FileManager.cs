@@ -260,7 +260,6 @@ namespace Fahrgemeinschaft
             return entries;
         }
 
-
         public static void WriteUserData(List<string[]> entries)
         {
             FileManager fileManager = new FileManager();
@@ -314,6 +313,22 @@ namespace Fahrgemeinschaft
             }
             return entries;
         }
+
+        public static List<string[]> ReadMessages()
+        {
+            FileManager fileManager = new FileManager();
+            List<string[]> entries = new List<string[]>();
+
+            using (StreamReader sr = new StreamReader(fileManager.PathMessages))
+            {
+                while (!sr.EndOfStream)
+                {
+                    entries.Add(sr.ReadLine().Split(';'));
+                }
+            }
+            return entries;
+        }
+
 
         public static (int, int) LookForUserInFile(UserCreation user)
         {

@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Fahrgemeinschaft
 {
-    internal class Messages
+    public class Messages
     {
+        
     }
 }

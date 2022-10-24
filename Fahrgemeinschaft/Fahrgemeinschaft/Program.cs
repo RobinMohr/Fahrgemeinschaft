@@ -13,13 +13,14 @@ namespace Fahrgemeinschaft
     {
         static void Main(string[] args)
         {
-            List<int> intermediate = new List<int> {11,2,6};
-            int start = 0;
-            int end = 10 ;
             FileManager.CheckAllFiles();
 
-            Console.WriteLine(Maps.Calculate(start, end, intermediate));
-            Console.ReadLine();
+            //List<int> intermediate = new List<int> {11,2,6};
+            //int start = 0;
+            //int end = 10 ;
+
+            //Console.WriteLine(Maps.Calculate(start, end, intermediate));
+            //Console.ReadLine();
 
             FileManager.CheckAllFiles();
             UserCreation.LogInOrRegister();
