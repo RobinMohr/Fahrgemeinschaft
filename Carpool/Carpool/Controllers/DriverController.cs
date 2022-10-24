@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Reflection.Metadata;
 using TecAlliance.Carpools.Business.Models;
 using TecAlliance.Carpools.Business.Services;
-
+using TecAlliance.Carpools.Data.Models;
 
 namespace Carpools.Controllers
 {
@@ -67,6 +67,17 @@ namespace Carpools.Controllers
                 return BadRequest();
             }
             return deletedDriver;
+        }
+
+        [HttpGet("yourCarpools/{userID}")]
+        public async Task<ActionResult<List<Carpool>>> ViewCurrentCarpools(int userID)
+        {
+            List<Carpool> allCurrentCarpools = driverBusinessService.ViewCurrentCarpools(userID);
+            if (allCurrentCarpools == null)
+            {
+                return NotFound();
+            }
+            return allCurrentCarpools;
         }
     }
 }

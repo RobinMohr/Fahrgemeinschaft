@@ -18,7 +18,10 @@ namespace TecAlliance.Carpools.Business.Services
         private DriverDataService _driverDataService = new DriverDataService();
 
         private List<Driver> allDrivers = new List<Driver>();
-        
+
+        private CarpoolDataService _carpoolDataService = new CarpoolDataService();
+        private List<Carpool> allCarpools = new List<Carpool>();
+
         public DriverDto GetDriver(int id)
         {
             return DriverToDTO(_driverDataService.GetDriver(id));
@@ -49,7 +52,7 @@ namespace TecAlliance.Carpools.Business.Services
             int count = 0;
             foreach (var driver in allDrivers)
             {
-                if (driver.ID == id&&driver.Password == pw)
+                if (driver.ID == id && driver.Password == pw)
                 {
                     allDrivers[id].City = city;
                     allDrivers[id].Name = name;
@@ -65,12 +68,11 @@ namespace TecAlliance.Carpools.Business.Services
             {
                 return DriverToDTO(new Driver { Password = pw, Name = name, City = city, ID = id });
             }
-            
+
         }
         public DriverDto CreateNewDriver(string password, string name, string city)
         {
             allDrivers = _driverDataService.ReadNonDriverData();
-
             int id = 0;
             if (allDrivers == null)
             {
@@ -114,6 +116,19 @@ namespace TecAlliance.Carpools.Business.Services
                 }
             }
             return null;
+        }
+        public List<Carpool> ViewCurrentCarpools(int userID)
+        {
+            allCarpools = _carpoolDataService.ReadCarpoolData();
+            List<Carpool> carpools = new List<Carpool>();
+            foreach (var Carpool in allCarpools)
+            {
+                if (Carpool.Owner.ID == userID)
+                {
+                    carpools.Add(Carpool);
+                }
+            }
+            return carpools;
         }
     }
 }

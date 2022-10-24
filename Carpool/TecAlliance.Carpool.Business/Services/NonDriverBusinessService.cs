@@ -16,7 +16,11 @@ namespace TecAlliance.Carpools.Business.Services
     public class NonDriverBusinessService
     {
         private NonDriverDataService _nonDriverDataService = new NonDriverDataService();
-        private List<NonDriver> allNonDrivers = new List<NonDriver>();  
+        private List<NonDriver> allNonDrivers = new List<NonDriver>();
+
+        private CarpoolBusinessService _carpoolBusinessService = new CarpoolBusinessService();
+        private CarpoolDataService _carpoolDataService = new CarpoolDataService();
+        private List<Carpool> allCarpools = new List<Carpool>();
         public NonDriverDto GetNonDriver(int id)
         {
             return NonDriverToDto(_nonDriverDataService.GetNonDriver(id));
@@ -27,7 +31,6 @@ namespace TecAlliance.Carpools.Business.Services
             List<NonDriverDto> foo = new List<NonDriverDto>();
             foreach (var NonDriver in allNonDrivers)
             {
-
                 foo.Add(NonDriverToDto(NonDriver));
             }
             return foo;
@@ -116,6 +119,23 @@ namespace TecAlliance.Carpools.Business.Services
                 }
             }
             return null;
+        }
+
+        public List<CarpoolDto> ViewCurrentCarpools(int userID)
+        {
+            allCarpools = _carpoolDataService.ReadCarpoolData();
+            List<CarpoolDto> carpools = new List<CarpoolDto>();
+            foreach (var Carpool in allCarpools)
+            {
+               foreach (NonDriver passenger in Carpool.Passengers)
+               {
+                    if (passenger.ID == userID)
+                    {
+                        carpools.Add(_carpoolBusinessService.CarpoolToDto(Carpool));
+                    }
+               }
+            }
+            return carpools;
         }
     }
 }

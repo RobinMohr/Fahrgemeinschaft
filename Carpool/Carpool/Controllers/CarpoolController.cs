@@ -4,9 +4,9 @@ using System.ComponentModel.Design;
 using System.Reflection.Metadata;
 using TecAlliance.Carpools.Business.Models;
 using TecAlliance.Carpools.Business.Services;
+using TecAlliance.Carpools.Data.Models;
 
-
-namespace Carpools.Controllers
+namespace Carpools.Controllerss
 {
     [ApiController]
     [Route("[controller]")]
@@ -18,7 +18,6 @@ namespace Carpools.Controllers
         public CarpoolController(ILogger<CarpoolController> logger)
         {
             _logger = logger;
-            _carpoolBusinessService = new CarpoolBusinessService();
         }
 
         [HttpGet]
@@ -87,5 +86,8 @@ namespace Carpools.Controllers
             }
             return carpoolDTO;
         }
+
+       
+        
     }
 }
