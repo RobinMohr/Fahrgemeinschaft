@@ -19,6 +19,7 @@ namespace TecAlliance.Carpools.Data.Models
         public int FreeSpaces { get; set; }
         public List<NonDriver> Passengers { get; set; }
         public string Time { get; set; }
+        public bool Deleted { get; set; }
 
         public Carpool(int carpoolId, Driver owner, string startingPoint, string endingPoint, int freeSpaces, List<NonDriver> passengers, string time)
         {
@@ -29,6 +30,7 @@ namespace TecAlliance.Carpools.Data.Models
             FreeSpaces = freeSpaces;
             Passengers = passengers;
             Time = time;
+            Deleted = false;
         }
 
         public Carpool()

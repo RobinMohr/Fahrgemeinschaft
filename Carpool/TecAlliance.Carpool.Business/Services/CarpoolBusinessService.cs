@@ -120,33 +120,9 @@ namespace TecAlliance.Carpools.Business.Services
         public CarpoolDto CreateCarpool(int userID, string startingpoint, string endpoint, int freespaces, string time)
         {
             allCarpools = _carpoolDataService.ReadCarpoolData();
-            int id = 0;
-            if (allCarpools == null)
-            {
-                id = 0;
-            }
-            else
-            {
-                for (int i = 0; i <= allCarpools.Count; i++)
-                {
-                    int count = 0;
-                    foreach (var carpool in allCarpools)
-                    {
-                        if (carpool.CarpoolId == i) { break; }
-                        else
-                        {
-                            count++;
-                        }
-                    }
-                    if (count == allCarpools.Count)
-                    {
-                        id = i;
-                        break;
-                    }
-                }
-            }
+            int id = allCarpools.Count;
 
-            Carpool newCarpool = new Carpool()
+            Carpool newCarpool = new Carpool
             {
                 CarpoolId = id,
                 Owner = _driverDataService.GetDriver(userID),
@@ -173,19 +149,13 @@ namespace TecAlliance.Carpools.Business.Services
             {
                 return null;
             }
-            
-            if (id >= allCarpools.Count )
-            {
-                return null;
-            }
             foreach (var carpool in allCarpools)
             {
                 if ( carpool.CarpoolId == id && ownerID == carpool.Owner.ID)
                 {
-                    CarpoolDto cp = CarpoolToDto(carpool);
-                    allCarpools.Remove(carpool);
+                    carpool.Deleted = true;
                     _carpoolDataService.PrintCarpools(allCarpools);
-                    return cp;
+                    return CarpoolToDto(carpool);
                 }
             }
             return null;

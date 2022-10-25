@@ -10,7 +10,7 @@ namespace TecAlliance.Carpools.Data.Services
 {
     public class DriverDataService
     {
-        private readonly string PathDriverData= @"C:\010Pojects\020Fahrgemeinschaft\DriverInformation.csv";
+        private readonly string PathDriverData = GetPath();
         private List<Driver> allDrivers = new List<Driver>();
         
         public List<Driver> ReadNonDriverData()
@@ -52,7 +52,7 @@ namespace TecAlliance.Carpools.Data.Services
             }
             if (count != 0)
             {
-                Driver driver = new Driver()
+                Driver driver = new Driver
                 {
                     ID = Convert.ToInt32(allDrivers[i].ID),
                     Password = allDrivers[i].Password,
@@ -80,6 +80,11 @@ namespace TecAlliance.Carpools.Data.Services
                     sw.WriteLine(String.Join(";", sa[k]));
                 }
             }
+        }
+        public static string GetPath()
+        {
+            string path = @$"{Environment.CurrentDirectory}";
+            return @$"{Path.GetFullPath(Path.Combine(path, @"..\"))}TecAlliance.Carpool.Data\DriverInformation.csv";
         }
     }
 }

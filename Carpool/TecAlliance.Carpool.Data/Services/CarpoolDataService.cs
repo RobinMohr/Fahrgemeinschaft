@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,17 +11,20 @@ namespace TecAlliance.Carpools.Data.Services
 {
     public class CarpoolDataService
     {
-        private readonly string PathCarpoolData = @"C:\010Pojects\020Fahrgemeinschaft\Carpools.csv";
+        //assembly get current path
+        //var test = Assembly.GetAssembly(typeof(CarpoolDataService)).Location;
+
+        //string path = AssemblyDirectory;
+
+        private readonly string PathCarpoolData = GetPath();
         DriverDataService _driverDataService = new DriverDataService();
         NonDriverDataService _nonDriverDataService = new NonDriverDataService();
 
         private List<Carpool> allCarpools = new List<Carpool>();
-        private List<Driver> allDrivers = new List<Driver>();      
 
         public List<Carpool> ReadCarpoolData()
         {
             List<Carpool> carpools = new List<Carpool>();
-            List<NonDriver> passengers = new List<NonDriver>();
             using (StreamReader sr = new StreamReader(PathCarpoolData))
             {
                 while (!sr.EndOfStream)
@@ -29,10 +33,11 @@ namespace TecAlliance.Carpools.Data.Services
                     var car = sr.ReadLine();
                     if (car == null)
                     {
-                        
                     }
                     else
                     {
+                        List<NonDriver> passengers = new List<NonDriver>();
+
                         string[] oldCarpool = car.Split(';');
 
                         Driver ownerDriver = _driverDataService.GetDriver(Convert.ToInt32(oldCarpool[1]));
@@ -59,23 +64,23 @@ namespace TecAlliance.Carpools.Data.Services
                 }
             }
             return carpools;
-        }    
+        }
         public void PrintCarpools(List<Carpool> carpools)
         {
             using (StreamWriter streamWriter = new StreamWriter(PathCarpoolData))
             {
                 foreach (Carpool carpool in carpools)
                 {
-                    List <int> passengers = new List<int>();
+                    List<int> passengers = new List<int>();
                     foreach (var x in carpool.Passengers)
                     {
-                        passengers.Add(Convert.ToInt32(x.ID));
+                        passengers.Add(x.ID);
                     }
-                    string passengerID = string.Join(',',passengers);
+                    string passengerID = string.Join(',', passengers);
                     streamWriter.WriteLine(String.Join(';', new string[] { Convert.ToString(carpool.CarpoolId), Convert.ToString(carpool.Owner.ID), carpool.StartingPoint, carpool.EndingPoint, passengerID, Convert.ToString(carpool.FreeSpaces), carpool.Time }));
                 }
             }
-        }        
+        }
         public Carpool GetCarpoolData(int carpoolID)
         {
             allCarpools = ReadCarpoolData();
@@ -94,14 +99,19 @@ namespace TecAlliance.Carpools.Data.Services
             }
             return new Carpool()
             {
-            CarpoolId = allCarpools[carpoolPos].CarpoolId,
-            Owner = allCarpools[carpoolPos].Owner,
-            StartingPoint = allCarpools [carpoolPos].StartingPoint,
-            EndingPoint = allCarpools[carpoolPos].EndingPoint,
-            FreeSpaces = allCarpools [carpoolPos].FreeSpaces,
-            Passengers = allCarpools[carpoolPos].Passengers,
-            Time = allCarpools[carpoolPos].Time,
+                CarpoolId = allCarpools[carpoolPos].CarpoolId,
+                Owner = allCarpools[carpoolPos].Owner,
+                StartingPoint = allCarpools[carpoolPos].StartingPoint,
+                EndingPoint = allCarpools[carpoolPos].EndingPoint,
+                FreeSpaces = allCarpools[carpoolPos].FreeSpaces,
+                Passengers = allCarpools[carpoolPos].Passengers,
+                Time = allCarpools[carpoolPos].Time,
             };
+        }
+        public static string GetPath()
+        {
+            string path = @$"{Environment.CurrentDirectory}";
+            return @$"{Path.GetFullPath(Path.Combine(path, @"..\"))}TecAlliance.Carpool.Data\Carpools.csv";
         }
     }
 }

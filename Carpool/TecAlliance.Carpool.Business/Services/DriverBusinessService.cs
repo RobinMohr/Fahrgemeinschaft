@@ -110,7 +110,7 @@ namespace TecAlliance.Carpools.Business.Services
             {
                 if (driver.ID == id && driver.Password == password)
                 {
-                    allDrivers.Remove(driver);
+                    driver.Deleted = true;
                     _driverDataService.PrintUserData(allDrivers);
                     return DriverToDTO(driver);
                 }

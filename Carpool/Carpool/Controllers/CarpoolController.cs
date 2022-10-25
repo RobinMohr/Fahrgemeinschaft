@@ -8,11 +8,11 @@ using TecAlliance.Carpools.Data.Models;
 
 namespace Carpools.Controllerss
 {
-    [ApiController]
+    [ApiController] 
     [Route("[controller]")]
     public class CarpoolController : ControllerBase
     {
-        private CarpoolBusinessService _carpoolBusinessService;
+        private CarpoolBusinessService _carpoolBusinessService = new CarpoolBusinessService();
         private readonly ILogger<CarpoolController> _logger;
 
         public CarpoolController(ILogger<CarpoolController> logger)
@@ -85,9 +85,6 @@ namespace Carpools.Controllerss
                 return BadRequest();
             }
             return carpoolDTO;
-        }
-
-       
-        
+        }        
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace TecAlliance.Carpool.Api
+﻿using TecAlliance.Carpools.Data.Services;
+
+namespace TecAlliance.Carpool.Api
 {
     public class Files
     {
@@ -8,9 +10,9 @@
 
         public Files()
         {
-            PathDriver = @"C:\010Pojects\020Fahrgemeinschaft\DriverInformation.csv";
-            PathNonDriver = @"C:\010Pojects\020Fahrgemeinschaft\NonDriverInformation.csv";
-            PathCarpool = @"C:\010Pojects\020Fahrgemeinschaft\Carpools.csv";
+            PathDriver = DriverDataService.GetPath();
+            PathNonDriver = NonDriverDataService.GetPath();
+            PathCarpool = CarpoolDataService.GetPath();
         }
 
         public void CheckForAllCsvFiles()

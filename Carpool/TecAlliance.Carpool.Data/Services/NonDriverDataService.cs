@@ -9,7 +9,7 @@ namespace TecAlliance.Carpools.Data.Services
 {
     public class NonDriverDataService
     {
-        public readonly string PathNonDriver = @"C:\010Pojects\020Fahrgemeinschaft\NonDriverInformation.csv";
+        public readonly string PathNonDriver = GetPath();
         private List<NonDriver> allNonDrivers = new List<NonDriver>();
         public List<NonDriver> ReadUserData()
         {
@@ -85,6 +85,11 @@ namespace TecAlliance.Carpools.Data.Services
                     sw.WriteLine(String.Join(";", sa[k]));
                 }
             }
+        }
+        public static string GetPath()
+        {
+            string path = @$"{Environment.CurrentDirectory}";
+            return @$"{Path.GetFullPath(Path.Combine(path, @"..\"))}TecAlliance.Carpool.Data\NonDriverInformation.csv";
         }
     }
 }

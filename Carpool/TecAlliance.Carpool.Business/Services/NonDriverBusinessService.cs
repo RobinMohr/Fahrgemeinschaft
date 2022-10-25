@@ -69,43 +69,11 @@ namespace TecAlliance.Carpools.Business.Services
         public NonDriverDto CreateNewNonDriver(string password, string name, string city)
         {
             allNonDrivers = _nonDriverDataService.ReadUserData();
-            NonDriver newNonDriver = new NonDriver { Name = name, City = city, ID = FindUnusedID(), Password = password };
+            NonDriver newNonDriver = new NonDriver { Name = name, City = city, ID = allNonDrivers.Count, Password = password };
             allNonDrivers.Add(newNonDriver);
             _nonDriverDataService.PrintUserData(allNonDrivers);
             return NonDriverToDto(newNonDriver);
         }
-
-        public int FindUnusedID()
-        {
-            int id = 0;
-            if (allNonDrivers == null)
-            {
-                id = 0;
-            }
-            else
-            {
-                for (int i = 0; i <= allNonDrivers.Count; i++)
-                {
-                    int count = 0;
-                    foreach (var carpool in allNonDrivers)
-                    {
-                        if (carpool.ID == i) { break; }
-                        else
-                        {
-                            count++;
-                        }
-                    }
-                    if (count == allNonDrivers.Count)
-                    {
-                        id = i;
-                        break;
-                    }
-                }
-            }
-
-            return id;
-        }
-
         public NonDriverDto DelNonDriver(int id, string password)
         {
             allNonDrivers = _nonDriverDataService.ReadUserData();           
@@ -113,7 +81,7 @@ namespace TecAlliance.Carpools.Business.Services
             {
                 if (NonDriver.ID == id && NonDriver.Password == password)
                 {
-                    allNonDrivers.Remove(NonDriver);
+                    NonDriver.Deleted = true;
                     _nonDriverDataService.PrintUserData(allNonDrivers);
                     return NonDriverToDto(NonDriver);
                 }
