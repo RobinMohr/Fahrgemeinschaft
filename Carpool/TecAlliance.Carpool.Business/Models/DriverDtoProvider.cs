@@ -13,7 +13,7 @@ namespace TecAlliance.Carpools.Business.Models
     {
         public DriverDto GetExamples()
         {
-            return new DriverDto { Name = "Rainer Zufall", City = "Weikersheim", ID = 66 };
+            return new DriverDto { Name = "Lucifer", City = "Hölle", ID = 666 };
         }
     }
 }

@@ -13,7 +13,7 @@ namespace TecAlliance.Carpools.Business.Models
     {
         public NonDriverDto GetExamples()
         {
-            return new NonDriverDto { Name = "Max Musterann", City = "Weikersheim", ID = 99};
+            return new NonDriverDto { Name = "Pascalll Passagier", City = "Janz weet drousen", ID = 99};
         }
     }
 }

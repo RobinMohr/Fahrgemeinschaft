@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Metadata.Ecma335;
@@ -7,16 +8,10 @@ using System.Text;
 using System.Threading.Tasks;
 using TecAlliance.Carpools.Data.Models;
 
-namespace TecAlliance.Carpools.Data.Services
-{
+namespace TecAlliance.Carpools.Data.Services{
     public class CarpoolDataService
     {
-        //assembly get current path
-        //var test = Assembly.GetAssembly(typeof(CarpoolDataService)).Location;
-
-        //string path = AssemblyDirectory;
-
-        private readonly string PathCarpoolData = GetPath();
+        private readonly string PathCarpoolData = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\Carpools.csv";
         DriverDataService _driverDataService = new DriverDataService();
         NonDriverDataService _nonDriverDataService = new NonDriverDataService();
 
@@ -72,19 +67,17 @@ namespace TecAlliance.Carpools.Data.Services
                 foreach (Carpool carpool in carpools)
                 {
                     List<int> passengers = new List<int>();
-                    foreach (var x in carpool.Passengers)
+                    foreach (var passenger in carpool.Passengers)
                     {
-                        passengers.Add(x.ID);
+                        passengers.Add(passenger.ID);
                     }
-                    string passengerID = string.Join(',', passengers);
-                    streamWriter.WriteLine(String.Join(';', new string[] { Convert.ToString(carpool.CarpoolId), Convert.ToString(carpool.Owner.ID), carpool.StartingPoint, carpool.EndingPoint, passengerID, Convert.ToString(carpool.FreeSpaces), carpool.Time }));
+                    streamWriter.WriteLine(string.Join(';', new string[] { Convert.ToString(carpool.CarpoolId), Convert.ToString(carpool.Owner.ID), carpool.StartingPoint, carpool.EndingPoint, string.Join(',', passengers), Convert.ToString(carpool.FreeSpaces), carpool.Time }));
                 }
             }
         }
         public Carpool GetCarpoolData(int carpoolID)
         {
             allCarpools = ReadCarpoolData();
-            int carpoolPos = 0;
             if (allCarpools == null)
             {
                 return null;
@@ -93,25 +86,20 @@ namespace TecAlliance.Carpools.Data.Services
             {
                 if (carpool.CarpoolId == carpoolID)
                 {
-                    break;
+                    return new Carpool()
+                    {
+                        CarpoolId = carpool.CarpoolId,
+                        Owner = carpool.Owner,
+                        StartingPoint = carpool.StartingPoint,
+                        EndingPoint = carpool.EndingPoint,
+                        FreeSpaces = carpool.FreeSpaces,
+                        Passengers = carpool.Passengers,
+                        Time = carpool.Time,
+                        Deleted = carpool.Deleted,
+                    };
                 }
-                carpoolPos++;
             }
-            return new Carpool()
-            {
-                CarpoolId = allCarpools[carpoolPos].CarpoolId,
-                Owner = allCarpools[carpoolPos].Owner,
-                StartingPoint = allCarpools[carpoolPos].StartingPoint,
-                EndingPoint = allCarpools[carpoolPos].EndingPoint,
-                FreeSpaces = allCarpools[carpoolPos].FreeSpaces,
-                Passengers = allCarpools[carpoolPos].Passengers,
-                Time = allCarpools[carpoolPos].Time,
-            };
-        }
-        public static string GetPath()
-        {
-            string path = @$"{Environment.CurrentDirectory}";
-            return @$"{Path.GetFullPath(Path.Combine(path, @"..\"))}TecAlliance.Carpool.Data\Carpools.csv";
+            return null;
         }
     }
 }

@@ -9,7 +9,7 @@ namespace TecAlliance.Carpools.Data.Services
 {
     public class NonDriverDataService
     {
-        public readonly string PathNonDriver = GetPath();
+        public readonly string PathNonDriver = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\NonDriverInformation.csv";
         private List<NonDriver> allNonDrivers = new List<NonDriver>();
         public List<NonDriver> ReadUserData()
         {
@@ -29,6 +29,7 @@ namespace TecAlliance.Carpools.Data.Services
                         driver.Password = nonDriverFromCsv[1];
                         driver.Name = nonDriverFromCsv[2];
                         driver.City = nonDriverFromCsv[3];
+                        driver.Deleted = Convert.ToBoolean(nonDriverFromCsv[4]);
                         data.Add(driver);
                     }
                 }
@@ -37,59 +38,35 @@ namespace TecAlliance.Carpools.Data.Services
         }
         public NonDriver GetNonDriver(int userId)
         {
-            int count = 0;
             allNonDrivers = ReadUserData();
-            if (allNonDrivers.Count == 0)
-            {
-                return null;
-            }
-            int i = 0;
-            for (int j =0; i < allNonDrivers.Count; i++)
+            for (int i = 0; i < allNonDrivers.Count; i++)
             {
                 if (allNonDrivers[i].ID == userId)
                 {
-                    count++;
-                    break;
+                    NonDriver nonDriver = new NonDriver()
+                    {
+                        ID = Convert.ToInt32(allNonDrivers[i].ID),
+                        Password = allNonDrivers[i].Password,
+                        Name = allNonDrivers[i].Name,
+                        City = allNonDrivers[i].City,
+                    };
+                    return nonDriver;
                 }
             }
-            if (count != 0)
-            {
-                NonDriver nonDriver = new NonDriver()
-                {
-                    ID = Convert.ToInt32(allNonDrivers[i].ID),
-                    Password = allNonDrivers[i].Password,
-                    Name = allNonDrivers[i].Name,
-                    City = allNonDrivers[i].City,
-                };
-                return nonDriver;
-            }         
-            else
-            {
-                throw new Exception("no user with that id could be found");
-            }
+            return null;
         }
        
         public void PrintUserData(List<NonDriver> nonDrivers)
         {
-            using (StreamWriter sw = new StreamWriter(PathNonDriver))
+            using (StreamWriter streamWriter = new StreamWriter(PathNonDriver))
             {
-                List<string[]> sa = new List<string[]>();
+                List<string[]> allNonDriver = new List<string[]>();
 
                 for (int p = 0; p < nonDrivers.Count; p++)
-                {
-                    string[] s = new string[] { Convert.ToString(nonDrivers[p].ID), nonDrivers[p].Password, nonDrivers[p].Name, nonDrivers[p].City };
-                    sa.Add(s);
-                }
-                for (int k = 0; k < nonDrivers.Count; k++)
-                {
-                    sw.WriteLine(String.Join(";", sa[k]));
+                {                
+                    streamWriter.WriteLine(String.Join(";", new string[] { Convert.ToString(nonDrivers[p].ID), nonDrivers[p].Password, nonDrivers[p].Name, nonDrivers[p].City, Convert.ToString(nonDrivers[p].Deleted)}));
                 }
             }
-        }
-        public static string GetPath()
-        {
-            string path = @$"{Environment.CurrentDirectory}";
-            return @$"{Path.GetFullPath(Path.Combine(path, @"..\"))}TecAlliance.Carpool.Data\NonDriverInformation.csv";
-        }
+        }       
     }
 }

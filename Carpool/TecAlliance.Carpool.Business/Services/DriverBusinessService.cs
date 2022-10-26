@@ -29,27 +29,30 @@ namespace TecAlliance.Carpools.Business.Services
         public List<DriverDto> GetAllDriver()
         {
             allDrivers = _driverDataService.ReadNonDriverData();
-            List<DriverDto> foo = new List<DriverDto>();
+            List<DriverDto> allDriver = new List<DriverDto>();
             foreach (var driver in allDrivers)
             {
-                foo.Add(DriverToDTO(driver));
+                allDriver.Add(DriverToDTO(driver));
             }
-            return foo;
+            return allDriver;
         }
         public DriverDto DriverToDTO(Driver d)
         {
+            if (d == null)
+            {
+                return null;
+            }
             DriverDto driver = new DriverDto
             {
                 Name = d.Name,
                 City = d.City,
-                ID = d.ID
+                ID = d.ID,
             };
             return driver;
         }
         public DriverDto UpdateDriver(int id, string pw, string name, string city)
         {
             allDrivers = _driverDataService.ReadNonDriverData();
-            int count = 0;
             foreach (var driver in allDrivers)
             {
                 if (driver.ID == id && driver.Password == pw)
@@ -57,48 +60,15 @@ namespace TecAlliance.Carpools.Business.Services
                     allDrivers[id].City = city;
                     allDrivers[id].Name = name;
                     _driverDataService.PrintUserData(allDrivers);
-                    count++;
+                    return DriverToDTO(new Driver { Password = pw, Name = name, City = city, ID = id });
                 }
             }
-            if (count == 0)
-            {
-                throw new Exception("nonono, id falsch");
-            }
-            else
-            {
-                return DriverToDTO(new Driver { Password = pw, Name = name, City = city, ID = id });
-            }
-
+            return null;
         }
         public DriverDto CreateNewDriver(string password, string name, string city)
         {
-            allDrivers = _driverDataService.ReadNonDriverData();
-            int id = 0;
-            if (allDrivers == null)
-            {
-                id = 0;
-            }
-            else
-            {
-                for (int i = 0; i <= allDrivers.Count; i++)
-                {
-                    int count = 0;
-                    foreach (var carpool in allDrivers)
-                    {
-                        if (carpool.ID == i) { break; }
-                        else
-                        {
-                            count++;
-                        }
-                    }
-                    if (count == allDrivers.Count)
-                    {
-                        id = i;
-                        break;
-                    }
-                }
-            }
-            Driver newestDriver = new Driver { Name = name, City = city, ID = id, Password = password };
+            allDrivers = _driverDataService.ReadNonDriverData();           
+            Driver newestDriver = new Driver { Name = name, City = city, ID = allDrivers.Count, Password = password };
             allDrivers.Add(newestDriver);
             _driverDataService.PrintUserData(allDrivers);
             return DriverToDTO(newestDriver);

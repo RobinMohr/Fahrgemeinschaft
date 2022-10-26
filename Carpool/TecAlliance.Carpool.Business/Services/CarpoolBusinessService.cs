@@ -66,71 +66,61 @@ namespace TecAlliance.Carpools.Business.Services
         public CarpoolDto UpdateCarpool(int id, string startingPoint, string endingPoint, int freeSpaces, string time)
         {
             allCarpools = _carpoolDataService.ReadCarpoolData();
-            if (allCarpools == null)
+            Carpool chosenCarpool = _carpoolDataService.GetCarpoolData(id);
+            if (chosenCarpool == null)
             {
                 return null;
             }
-            for (int i = 0; i < allCarpools.Count; i++)
-            {
-                if (allCarpools[i].CarpoolId == id)
-                {
-                    allCarpools[i].StartingPoint = startingPoint;
-                    allCarpools[i].EndingPoint = endingPoint;
-                    allCarpools[i].FreeSpaces = freeSpaces;
-                    allCarpools[i].Time = time;
+            chosenCarpool.StartingPoint = startingPoint;
+            chosenCarpool.EndingPoint = endingPoint;
+            chosenCarpool.FreeSpaces = freeSpaces;
+            chosenCarpool.Time = time;
 
-                    _carpoolDataService.PrintCarpools(allCarpools);
-                    return new CarpoolDto 
-                    {
-                        CarpoolId = id,
-                        Owner = _driverBusinessService.DriverToDTO(allCarpools[i].Owner),
-                        StartingPoint = startingPoint,
-                        EndingPoint = endingPoint,
-                        FreeSpaces = freeSpaces,
-                        Time = time 
-                    };
-                }
-            }
-            return null;
+            _carpoolDataService.PrintCarpools(allCarpools);
+            return new CarpoolDto
+            {
+                CarpoolId = id,
+                Owner = _driverBusinessService.DriverToDTO(chosenCarpool.Owner),
+                StartingPoint = startingPoint,
+                EndingPoint = endingPoint,
+                FreeSpaces = freeSpaces,
+                Time = time
+            };
         }
         public CarpoolDto JoinCarpool(int carpoolID, int userID)
         {
             allCarpools = _carpoolDataService.ReadCarpoolData();
-
             Carpool carpool = _carpoolDataService.GetCarpoolData(carpoolID);
+
             if (carpool.FreeSpaces <= 0 || allCarpools == null)
             {
                 return null;
             }
             else
             {
-                var passengar = _nonDriverDataService.GetNonDriver(userID);
-                for (int i = 0; i < allCarpools.Count; i++)
-                {
-                    if (allCarpools[i].CarpoolId == carpoolID)
-                    {
-                        allCarpools[i].Passengers.Add(passengar);
-                        allCarpools[i].FreeSpaces--;
-                    }
-                }
+                var passenger = _nonDriverDataService.GetNonDriver(userID);
+
+                carpool.Passengers.Add(passenger);
+                carpool.FreeSpaces--;
+
                 _carpoolDataService.PrintCarpools(allCarpools);
-                return CarpoolToDto(_carpoolDataService.GetCarpoolData(carpoolID));
-            }            
+                return CarpoolToDto(carpool);
+            }
         }
         public CarpoolDto CreateCarpool(int userID, string startingpoint, string endpoint, int freespaces, string time)
         {
             allCarpools = _carpoolDataService.ReadCarpoolData();
-            int id = allCarpools.Count;
 
             Carpool newCarpool = new Carpool
             {
-                CarpoolId = id,
+                CarpoolId = allCarpools.Count,
                 Owner = _driverDataService.GetDriver(userID),
                 StartingPoint = startingpoint,
                 EndingPoint = endpoint,
                 FreeSpaces = freespaces,
                 Passengers = new List<NonDriver>(),
                 Time = time,
+                Deleted = false,
             };
 
             if (newCarpool != null)

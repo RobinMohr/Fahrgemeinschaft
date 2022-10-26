@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,9 +12,13 @@ namespace TecAlliance.Carpools.Business.Models
     {
         public int CarpoolId { get; set; }
         public DriverDto Owner { get; set; }
+        [Required]
         public string StartingPoint { get; set; }
+        [Required]
         public string EndingPoint { get; set; }
+        [Required]
         public string Time { get; set; }
+        [Required]
         public int FreeSpaces { get; set; }
 
         public CarpoolDto(int carpoolId, DriverDto owner, string startingPoint, string endingPoint, string time, int freeSpaces)

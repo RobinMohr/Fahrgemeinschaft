@@ -21,6 +21,8 @@ namespace Carpools.Controllerss
         }
 
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<List<CarpoolDto>>> GetAll()
         {
             List<CarpoolDto> allCarpools = _carpoolBusinessService.GetAll();
@@ -32,6 +34,8 @@ namespace Carpools.Controllerss
         }
 
         [HttpGet("{carpoolID}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<CarpoolDto>> Get(int carpoolID)
         {
             CarpoolDto singleCarpool = _carpoolBusinessService.Get(carpoolID);
@@ -43,6 +47,8 @@ namespace Carpools.Controllerss
         }
 
         [HttpPut("{carpoolID}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CarpoolDto>> ChangeCarpool(int carpoolID, string startingPoint, string endingPoint, int freeSpaces, string time)
         {
             CarpoolDto changedCarpool = _carpoolBusinessService.UpdateCarpool(carpoolID, startingPoint, endingPoint, freeSpaces, time);
@@ -59,30 +65,34 @@ namespace Carpools.Controllerss
             CarpoolDto joinedCarpool = _carpoolBusinessService.JoinCarpool(JoinID, userID);
             if (joinedCarpool == null)
             {
-                return BadRequest();
+                return NotFound();
             }
             return joinedCarpool;
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<CarpoolDto>> CreateNewCarpool(int userID, string startingpoint, string endpoint, int freespaces, string time)
         {
             CarpoolDto addedCarpool = _carpoolBusinessService.CreateCarpool(userID, startingpoint, endpoint, freespaces, time);
             if (addedCarpool == null)
             {
-                return NotFound();
+                return BadRequest();
             }
             return addedCarpool;
         }
 
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CarpoolDto>> DeleteDriver(int id, int ownerID)
         {
             CarpoolDto carpoolDTO = _carpoolBusinessService.DelCarpool(id, ownerID);
 
             if (carpoolDTO == null)
             {
-                return BadRequest();
+                return NotFound();
             }
             return carpoolDTO;
         }        

@@ -4,16 +4,9 @@ namespace TecAlliance.Carpool.Api
 {
     public class Files
     {
-        public readonly string PathDriver;
-        public readonly string PathNonDriver;
-        public readonly string PathCarpool;
-
-        public Files()
-        {
-            PathDriver = DriverDataService.GetPath();
-            PathNonDriver = NonDriverDataService.GetPath();
-            PathCarpool = CarpoolDataService.GetPath();
-        }
+        public readonly string PathDriver= @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\DriverInformation.csv";
+        public readonly string PathNonDriver = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\NonDriverInformation.csv";
+        public readonly string PathCarpool = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\Carpools.csv";
 
         public void CheckForAllCsvFiles()
         {

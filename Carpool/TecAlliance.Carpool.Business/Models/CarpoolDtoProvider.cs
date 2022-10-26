@@ -12,7 +12,7 @@ namespace TecAlliance.Carpools.Business.Models
     {
         public CarpoolDto GetExamples()
         {
-            return new CarpoolDto() { CarpoolId = 0, EndingPoint = "MGH", StartingPoint = "WKH", FreeSpaces = 3, Owner = new DriverDto() { ID = 0, City = "WKH", Name = "Robin Mohr" }, Time = "15:50" };
+            return new CarpoolDto() { CarpoolId = 1, EndingPoint = "MGH", StartingPoint = "WKH", FreeSpaces = 3, Owner = new DriverDto() { ID = 0, City = "WKH", Name = "Angelo Merte" }, Time = "15:50" };
         }
     }
 }

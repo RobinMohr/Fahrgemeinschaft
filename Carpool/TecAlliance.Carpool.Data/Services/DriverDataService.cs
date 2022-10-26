@@ -10,7 +10,7 @@ namespace TecAlliance.Carpools.Data.Services
 {
     public class DriverDataService
     {
-        private readonly string PathDriverData = GetPath();
+        private readonly string PathDriverData = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\DriverInformation.csv";
         private List<Driver> allDrivers = new List<Driver>();
         
         public List<Driver> ReadNonDriverData()
@@ -39,52 +39,33 @@ namespace TecAlliance.Carpools.Data.Services
         }
         public Driver GetDriver(int userId)
         {
-            int count = 0;
             allDrivers = ReadNonDriverData();
-            int i = 0;
-            for (i = 0; i < allDrivers.Count; i++)
+            for (int i = 0; i < allDrivers.Count; i++)
             {
                 if (allDrivers[i].ID == userId)
                 {
-                    count++;
-                    break;
+                    Driver driver = new Driver
+                    {
+                        ID = allDrivers[i].ID,
+                        Password = allDrivers[i].Password,
+                        Name = allDrivers[i].Name,
+                        City = allDrivers[i].City,
+                    };
+                    return driver;
                 }
             }
-            if (count != 0)
-            {
-                Driver driver = new Driver
-                {
-                    ID = Convert.ToInt32(allDrivers[i].ID),
-                    Password = allDrivers[i].Password,
-                    Name = allDrivers[i].Name,
-                    City = allDrivers[i].City,
-                };
-                return driver;
-            }
-            throw new Exception("User id was not in CSV File");
+            return null;
         }
        
         public void PrintUserData(List<Driver> drivers)
         {
             using (StreamWriter sw = new StreamWriter(PathDriverData))
             {
-                List<string[]> sa = new List<string[]>();
-
                 for (int p = 0; p < drivers.Count; p++)
                 {
-                    string[] s = new string[] { Convert.ToString(drivers[p].ID), drivers[p].Password, drivers[p].Name, drivers[p].City };
-                    sa.Add(s);
-                }
-                for (int k = 0; k < drivers.Count; k++)
-                {
-                    sw.WriteLine(String.Join(";", sa[k]));
-                }
+                    sw.WriteLine(String.Join(";", new string[] { Convert.ToString(drivers[p].ID), drivers[p].Password, drivers[p].Name, drivers[p].City }));
+                }                
             }
-        }
-        public static string GetPath()
-        {
-            string path = @$"{Environment.CurrentDirectory}";
-            return @$"{Path.GetFullPath(Path.Combine(path, @"..\"))}TecAlliance.Carpool.Data\DriverInformation.csv";
         }
     }
 }

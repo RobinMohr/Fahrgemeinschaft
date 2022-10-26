@@ -13,52 +13,67 @@ namespace Carpools.Controllers
     {
         private DriverBusinessService driverBusinessService = new DriverBusinessService();
         private readonly ILogger<DriverController> _logger;
-
         public DriverController(ILogger<DriverController> logger)
         {
             _logger = logger;
         }
 
-
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<List<DriverDto>>> GetAll()
         {
-            var foo = driverBusinessService.GetAllDriver();
-            if (foo == null)
-            {
-                return BadRequest();
-            }
-            return foo;
-        }
-
-        [HttpGet("{id}")]
-        public async Task<ActionResult<DriverDto>> Get(int id)
-        {
-            var foo = driverBusinessService.GetDriver(id);
-            if (foo == null)
+            var allDriver = driverBusinessService.GetAllDriver();
+            if (allDriver == null)
             {
                 return NotFound();
             }
-            return foo;
+            return allDriver;
+        }
+
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<DriverDto>> Get(int id)
+        {
+            var returnedDriver = driverBusinessService.GetDriver(id);
+            if (returnedDriver == null)
+            {
+                return NotFound($"ID:{id} was not found.");
+            }
+            return returnedDriver;
         }
 
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<DriverDto>> Updatedriver(int id, string pw, string name, string city)
         {
-            return driverBusinessService.UpdateDriver(id, pw, name, city);
+            var updatedDriver = driverBusinessService.UpdateDriver(id, pw, name, city);
+            if (updatedDriver == null)
+            {
+                return NotFound($"ID:{id} was not found.");
+            }
+            return updatedDriver;
         }
 
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<DriverDto>> CreateNewDriver(string password, string name, string city)
         {
-            if (password == "" || name == "" || city == "")
+            var createdDriver = driverBusinessService.CreateNewDriver(password, name, city);
+            if (createdDriver == null)
             {
-                return BadRequest();
+                return BadRequest($"Something went wrong");
             }
-            return driverBusinessService.CreateNewDriver(password, name, city);
+
+            return createdDriver;           
         }
 
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<DriverDto>> DeleteDriver(int id, string password)
         {
             DriverDto deletedDriver = driverBusinessService.DelDriver(id, password);
@@ -70,12 +85,14 @@ namespace Carpools.Controllers
         }
 
         [HttpGet("yourCarpools/{userID}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<List<Carpool>>> ViewCurrentCarpools(int userID)
         {
             List<Carpool> allCurrentCarpools = driverBusinessService.ViewCurrentCarpools(userID);
             if (allCurrentCarpools == null)
             {
-                return NotFound();
+                return NotFound($"No current Carpools can be found");
             }
             return allCurrentCarpools;
         }
