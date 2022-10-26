@@ -12,11 +12,12 @@ namespace Carpools.Controllerss
     [Route("[controller]")]
     public class CarpoolController : ControllerBase
     {
-        private CarpoolBusinessService _carpoolBusinessService = new CarpoolBusinessService();
+        private ICarpoolBusinessService _carpoolBusinessService;
         private readonly ILogger<CarpoolController> _logger;
 
-        public CarpoolController(ILogger<CarpoolController> logger)
+        public CarpoolController(ILogger<CarpoolController> logger, ICarpoolBusinessService carpoolBusinessService)
         {
+            _carpoolBusinessService = carpoolBusinessService;
             _logger = logger;
         }
 

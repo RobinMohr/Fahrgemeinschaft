@@ -9,13 +9,19 @@ using System.Threading.Tasks;
 using TecAlliance.Carpools.Data.Models;
 
 namespace TecAlliance.Carpools.Data.Services{
-    public class CarpoolDataService
+    public class CarpoolDataService : ICarpoolDataService
     {
         private readonly string PathCarpoolData = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\Carpools.csv";
-        DriverDataService _driverDataService = new DriverDataService();
-        NonDriverDataService _nonDriverDataService = new NonDriverDataService();
+        private IDriverDataService _driverDataService;
+        private INonDriverDataService _nonDriverDataService;
 
         private List<Carpool> allCarpools = new List<Carpool>();
+
+        public CarpoolDataService(IDriverDataService driverDataService, INonDriverDataService nonDriverDataService)
+        {
+            _driverDataService = driverDataService;
+            _nonDriverDataService = nonDriverDataService;
+        }
 
         public List<Carpool> ReadCarpoolData()
         {

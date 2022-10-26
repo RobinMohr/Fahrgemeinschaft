@@ -13,14 +13,22 @@ using TecAlliance.Carpools.Data.Services;
 
 namespace TecAlliance.Carpools.Business.Services
 {
-    public class NonDriverBusinessService
+    public class NonDriverBusinessService : INonDriverBusinessService
     {
-        private NonDriverDataService _nonDriverDataService = new NonDriverDataService();
+        private INonDriverDataService _nonDriverDataService;
         private List<NonDriver> allNonDrivers = new List<NonDriver>();
 
-        private CarpoolBusinessService _carpoolBusinessService = new CarpoolBusinessService();
-        private CarpoolDataService _carpoolDataService = new CarpoolDataService();
+        private ICarpoolBusinessService _carpoolBusinessService;
+        private ICarpoolDataService _carpoolDataService;
         private List<Carpool> allCarpools = new List<Carpool>();
+
+        public NonDriverBusinessService(INonDriverDataService nonDriverDataService, ICarpoolBusinessService carpoolBusinessService, ICarpoolDataService carpoolDataService)
+        {
+            _nonDriverDataService = nonDriverDataService;
+            _carpoolBusinessService = carpoolBusinessService;
+            _carpoolDataService = carpoolDataService;
+        }
+
         public NonDriverDto GetNonDriver(int id)
         {
             return NonDriverToDto(_nonDriverDataService.GetNonDriver(id));
@@ -43,7 +51,7 @@ namespace TecAlliance.Carpools.Business.Services
             if (nonDriver == null)
             {
                 return null;
-            }  
+            }
             NonDriverDto nonDriverDto = new NonDriverDto
             {
                 Name = nonDriver.Name,
@@ -74,7 +82,7 @@ namespace TecAlliance.Carpools.Business.Services
                 return null;
             }
             allNonDrivers = _nonDriverDataService.ReadUserData();
-            NonDriver newNonDriver = new NonDriver { Name = name, City = city, ID = allNonDrivers.Count, Password = password , Deleted =false};
+            NonDriver newNonDriver = new NonDriver { Name = name, City = city, ID = allNonDrivers.Count, Password = password, Deleted = false };
             allNonDrivers.Add(newNonDriver);
             _nonDriverDataService.PrintUserData(allNonDrivers);
             return NonDriverToDto(newNonDriver);

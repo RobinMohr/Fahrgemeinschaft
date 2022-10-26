@@ -13,14 +13,20 @@ using TecAlliance.Carpools.Data.Services;
 
 namespace TecAlliance.Carpools.Business.Services
 {
-    public class DriverBusinessService
+    public class DriverBusinessService : IDriverBusinessService
     {
-        private DriverDataService _driverDataService = new DriverDataService();
+        private IDriverDataService _driverDataService;
 
         private List<Driver> allDrivers = new List<Driver>();
 
-        private CarpoolDataService _carpoolDataService = new CarpoolDataService();
+        private ICarpoolDataService _carpoolDataService;
         private List<Carpool> allCarpools = new List<Carpool>();
+
+        public DriverBusinessService(IDriverDataService driverDataService, ICarpoolDataService carpoolDataService)
+        {
+            _driverDataService = driverDataService;
+            _carpoolDataService = carpoolDataService;
+        }
 
         public DriverDto GetDriver(int id)
         {
@@ -67,7 +73,7 @@ namespace TecAlliance.Carpools.Business.Services
         }
         public DriverDto CreateNewDriver(string password, string name, string city)
         {
-            allDrivers = _driverDataService.ReadNonDriverData();           
+            allDrivers = _driverDataService.ReadNonDriverData();
             Driver newestDriver = new Driver { Name = name, City = city, ID = allDrivers.Count, Password = password };
             allDrivers.Add(newestDriver);
             _driverDataService.PrintUserData(allDrivers);

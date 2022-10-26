@@ -6,6 +6,8 @@ using Microsoft.OpenApi.Models;
 using TecAlliance.Carpools.Data.Models;
 using Swashbuckle.AspNetCore.Filters;
 using TecAlliance.Carpools.Business.Models;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using TecAlliance.Carpools.Data.Services;
 
 Files filemanager = new Files();
 filemanager.CheckForAllCsvFiles();
@@ -49,6 +51,16 @@ builder.Services.AddSwaggerExamplesFromAssemblyOf<NonDriverDtoProvider>();
 
 builder.Services.AddSingleton<DriverDtoProvider>();
 builder.Services.AddSwaggerExamplesFromAssemblyOf<DriverDtoProvider>();
+
+builder.Services.AddScoped<INonDriverBusinessService, NonDriverBusinessService>();
+builder.Services.AddScoped<INonDriverDataService, NonDriverDataService>();
+
+builder.Services.AddTransient<IDriverBusinessService, DriverBusinessService>();
+builder.Services.AddTransient<IDriverDataService, DriverDataService>();
+
+builder.Services.AddTransient<ICarpoolBusinessService, CarpoolBusinessService>();
+builder.Services.AddTransient<ICarpoolDataService, CarpoolDataService>();
+
 
 var app = builder.Build();
 

@@ -15,18 +15,26 @@ using TecAlliance.Carpools.Data.Services;
 
 namespace TecAlliance.Carpools.Business.Services
 {
-    public class CarpoolBusinessService
+    public class CarpoolBusinessService : ICarpoolBusinessService
     {
-        CarpoolDataService _carpoolDataService = new CarpoolDataService();
+        private ICarpoolDataService _carpoolDataService;
 
         List<Carpool> allCarpools = new List<Carpool>();
 
-        private NonDriverDataService _nonDriverDataService = new NonDriverDataService();
+        private INonDriverDataService _nonDriverDataService;
 
-        private DriverBusinessService _driverBusinessService = new DriverBusinessService();
+        private IDriverBusinessService _driverBusinessService;
 
-        private DriverDataService _driverDataService = new DriverDataService();
-        
+        private IDriverDataService _driverDataService;
+
+        public CarpoolBusinessService(ICarpoolDataService carpoolDataService, INonDriverDataService nonDriverDataService, IDriverBusinessService driverBusinessService, IDriverDataService driverDataService)
+        {
+            _carpoolDataService = carpoolDataService;
+            _nonDriverDataService = nonDriverDataService;
+            _driverBusinessService = driverBusinessService;
+            _driverDataService = driverDataService;
+        }
+
         public CarpoolDto Get(int id)
         {
             allCarpools = _carpoolDataService.ReadCarpoolData();
@@ -44,7 +52,7 @@ namespace TecAlliance.Carpools.Business.Services
             {
                 return null;
             }
-            for(int i = 0; i < allCarpools.Count; i++)
+            for (int i = 0; i < allCarpools.Count; i++)
             {
                 foo.Add(CarpoolToDto(allCarpools[i]));
             }
@@ -131,7 +139,7 @@ namespace TecAlliance.Carpools.Business.Services
             }
             return null;
         }
-        public  CarpoolDto DelCarpool(int id, int ownerID)
+        public CarpoolDto DelCarpool(int id, int ownerID)
         {
             allCarpools = _carpoolDataService.ReadCarpoolData();
 
@@ -141,7 +149,7 @@ namespace TecAlliance.Carpools.Business.Services
             }
             foreach (var carpool in allCarpools)
             {
-                if ( carpool.CarpoolId == id && ownerID == carpool.Owner.ID)
+                if (carpool.CarpoolId == id && ownerID == carpool.Owner.ID)
                 {
                     carpool.Deleted = true;
                     _carpoolDataService.PrintCarpools(allCarpools);

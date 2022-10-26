@@ -11,10 +11,12 @@ namespace Carpools.Controllers
     [Route("[controller]")]
     public class DriverController : ControllerBase
     {
-        private DriverBusinessService driverBusinessService = new DriverBusinessService();
+        private IDriverBusinessService driverBusinessService;
         private readonly ILogger<DriverController> _logger;
-        public DriverController(ILogger<DriverController> logger)
+
+        public DriverController(IDriverBusinessService driverBusinessService, ILogger<DriverController> logger)
         {
+            this.driverBusinessService = driverBusinessService;
             _logger = logger;
         }
 

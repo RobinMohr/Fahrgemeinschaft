@@ -8,11 +8,11 @@ using TecAlliance.Carpools.Data.Models;
 
 namespace TecAlliance.Carpools.Data.Services
 {
-    public class DriverDataService
+    public class DriverDataService : IDriverDataService
     {
         private readonly string PathDriverData = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\DriverInformation.csv";
         private List<Driver> allDrivers = new List<Driver>();
-        
+
         public List<Driver> ReadNonDriverData()
         {
             List<Driver> data = new List<Driver>();
@@ -32,7 +32,7 @@ namespace TecAlliance.Carpools.Data.Services
                         driver.Name = driverFromCsv[2];
                         driver.City = driverFromCsv[3];
                         data.Add(driver);
-                    }                    
+                    }
                 }
             }
             return data;
@@ -56,7 +56,7 @@ namespace TecAlliance.Carpools.Data.Services
             }
             return null;
         }
-       
+
         public void PrintUserData(List<Driver> drivers)
         {
             using (StreamWriter sw = new StreamWriter(PathDriverData))
@@ -64,7 +64,7 @@ namespace TecAlliance.Carpools.Data.Services
                 for (int p = 0; p < drivers.Count; p++)
                 {
                     sw.WriteLine(String.Join(";", new string[] { Convert.ToString(drivers[p].ID), drivers[p].Password, drivers[p].Name, drivers[p].City }));
-                }                
+                }
             }
         }
     }

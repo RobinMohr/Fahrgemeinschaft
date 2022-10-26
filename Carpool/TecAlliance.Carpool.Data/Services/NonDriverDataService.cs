@@ -7,7 +7,7 @@ using TecAlliance.Carpools.Data.Models;
 
 namespace TecAlliance.Carpools.Data.Services
 {
-    public class NonDriverDataService
+    public class NonDriverDataService : INonDriverDataService
     {
         public readonly string PathNonDriver = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\NonDriverInformation.csv";
         private List<NonDriver> allNonDrivers = new List<NonDriver>();
@@ -55,7 +55,7 @@ namespace TecAlliance.Carpools.Data.Services
             }
             return null;
         }
-       
+
         public void PrintUserData(List<NonDriver> nonDrivers)
         {
             using (StreamWriter streamWriter = new StreamWriter(PathNonDriver))
@@ -63,10 +63,10 @@ namespace TecAlliance.Carpools.Data.Services
                 List<string[]> allNonDriver = new List<string[]>();
 
                 for (int p = 0; p < nonDrivers.Count; p++)
-                {                
-                    streamWriter.WriteLine(String.Join(";", new string[] { Convert.ToString(nonDrivers[p].ID), nonDrivers[p].Password, nonDrivers[p].Name, nonDrivers[p].City, Convert.ToString(nonDrivers[p].Deleted)}));
+                {
+                    streamWriter.WriteLine(String.Join(";", new string[] { Convert.ToString(nonDrivers[p].ID), nonDrivers[p].Password, nonDrivers[p].Name, nonDrivers[p].City, Convert.ToString(nonDrivers[p].Deleted) }));
                 }
             }
-        }       
+        }
     }
 }
