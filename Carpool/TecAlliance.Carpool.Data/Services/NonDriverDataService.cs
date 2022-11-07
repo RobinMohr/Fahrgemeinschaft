@@ -4,14 +4,34 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TecAlliance.Carpools.Data.Models;
+using TecAlliance.Carpools.Data.Services.Interfaces;
 
 namespace TecAlliance.Carpools.Data.Services
 {
     public class NonDriverDataService : INonDriverDataService
     {
-        public readonly string PathNonDriver = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\NonDriverInformation.csv";
+        private string pathNonDriver = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\TecAlliance.Carpool.Data\NonDriverInformation.csv"))}";
+
+        public string PathNonDriver
+        {
+            get
+            {
+                return this.pathNonDriver;
+            }
+            set
+            {
+                this.pathNonDriver = value;
+            }
+        }
+
+        public NonDriverDataService(string pathNonDriver)
+        {
+            PathNonDriver = pathNonDriver;
+        }
+
         private List<NonDriver> allNonDrivers = new List<NonDriver>();
-        public List<NonDriver> ReadUserData()
+
+        public List<NonDriver> ReadNonDriverData()
         {
             List<NonDriver> data = new List<NonDriver>();
 
@@ -36,21 +56,20 @@ namespace TecAlliance.Carpools.Data.Services
             }
             return data;
         }
-        public NonDriver GetNonDriver(int userId)
+        public NonDriver GetNonDriverByID(int userId)
         {
-            allNonDrivers = ReadUserData();
+            allNonDrivers = ReadNonDriverData();
             for (int i = 0; i < allNonDrivers.Count; i++)
             {
                 if (allNonDrivers[i].ID == userId)
                 {
-                    NonDriver nonDriver = new NonDriver()
+                    return new NonDriver()
                     {
                         ID = Convert.ToInt32(allNonDrivers[i].ID),
                         Password = allNonDrivers[i].Password,
                         Name = allNonDrivers[i].Name,
                         City = allNonDrivers[i].City,
-                    };
-                    return nonDriver;
+                    };                    
                 }
             }
             return null;
@@ -61,7 +80,6 @@ namespace TecAlliance.Carpools.Data.Services
             using (StreamWriter streamWriter = new StreamWriter(PathNonDriver))
             {
                 List<string[]> allNonDriver = new List<string[]>();
-
                 for (int p = 0; p < nonDrivers.Count; p++)
                 {
                     streamWriter.WriteLine(String.Join(";", new string[] { Convert.ToString(nonDrivers[p].ID), nonDrivers[p].Password, nonDrivers[p].Name, nonDrivers[p].City, Convert.ToString(nonDrivers[p].Deleted) }));

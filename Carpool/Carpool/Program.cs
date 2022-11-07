@@ -1,13 +1,15 @@
 using Carpools.Controllers;
-using TecAlliance.Carpool.Api;
+using TecAlliance.Carpools.Api;
 using TecAlliance.Carpools.Business.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using TecAlliance.Carpools.Data.Models;
 using Swashbuckle.AspNetCore.Filters;
-using TecAlliance.Carpools.Business.Models;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using TecAlliance.Carpools.Data.Services;
+using TecAlliance.Carpools.Business.Services.Interfaces;
+using TecAlliance.Carpools.Data.Services.Interfaces;
+using TecAlliance.Carpools.Business.Models.Provider;
 
 Files filemanager = new Files();
 filemanager.CheckForAllCsvFiles();
@@ -45,6 +47,8 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddSingleton<CarpoolDtoProvider>();
 builder.Services.AddSwaggerExamplesFromAssemblyOf<CarpoolDtoProvider>();
+//builder.Services.AddSingleton<ListCarpoolDtoProvider>();
+//builder.Services.AddSwaggerExamplesFromAssemblyOf<ListCarpoolDtoProvider>();
 
 builder.Services.AddSingleton<NonDriverDtoProvider>();
 builder.Services.AddSwaggerExamplesFromAssemblyOf<NonDriverDtoProvider>();
@@ -55,11 +59,11 @@ builder.Services.AddSwaggerExamplesFromAssemblyOf<DriverDtoProvider>();
 builder.Services.AddScoped<INonDriverBusinessService, NonDriverBusinessService>();
 builder.Services.AddScoped<INonDriverDataService, NonDriverDataService>();
 
-builder.Services.AddTransient<IDriverBusinessService, DriverBusinessService>();
-builder.Services.AddTransient<IDriverDataService, DriverDataService>();
+builder.Services.AddScoped<IDriverBusinessService, DriverBusinessService>();
+builder.Services.AddScoped<IDriverDataService, DriverDataService>();
 
-builder.Services.AddTransient<ICarpoolBusinessService, CarpoolBusinessService>();
-builder.Services.AddTransient<ICarpoolDataService, CarpoolDataService>();
+builder.Services.AddScoped<ICarpoolBusinessService, CarpoolBusinessService>();
+builder.Services.AddScoped<ICarpoolDataService, CarpoolDataService>();
 
 
 var app = builder.Build();

@@ -7,22 +7,37 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using TecAlliance.Carpools.Data.Models;
+using TecAlliance.Carpools.Data.Services.Interfaces;
 
-namespace TecAlliance.Carpools.Data.Services{
+namespace TecAlliance.Carpools.Data.Services
+{
     public class CarpoolDataService : ICarpoolDataService
     {
-        private readonly string PathCarpoolData = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\Carpools.csv";
+        //public string driverDataPath = Carpools.Data.Properties.Resources.GeneralPath;
+        private string pathCarpoolData = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\Carpools.csv";
+        public string PathCarpoolData
+        {
+            get
+            {
+                return this.pathCarpoolData;
+            }
+            set
+            {
+                this.pathCarpoolData = value;
+            }
+        }
+
         private IDriverDataService _driverDataService;
         private INonDriverDataService _nonDriverDataService;
 
         private List<Carpool> allCarpools = new List<Carpool>();
 
-        public CarpoolDataService(IDriverDataService driverDataService, INonDriverDataService nonDriverDataService)
+        public CarpoolDataService(IDriverDataService driverDataService, INonDriverDataService nonDriverDataService, string pathCarpoolData)
         {
             _driverDataService = driverDataService;
             _nonDriverDataService = nonDriverDataService;
+            PathCarpoolData = pathCarpoolData;
         }
-
         public List<Carpool> ReadCarpoolData()
         {
             List<Carpool> carpools = new List<Carpool>();
@@ -41,7 +56,7 @@ namespace TecAlliance.Carpools.Data.Services{
 
                         string[] oldCarpool = car.Split(';');
 
-                        Driver ownerDriver = _driverDataService.GetDriver(Convert.ToInt32(oldCarpool[1]));
+                        Driver ownerDriver = _driverDataService.GetDriverByID(Convert.ToInt32(oldCarpool[1]));
 
                         string[] PassengerIDs = oldCarpool[4].Split(',');
                         foreach (string PassengerID in PassengerIDs)
@@ -50,7 +65,7 @@ namespace TecAlliance.Carpools.Data.Services{
                             {
                                 break;
                             }
-                            passengers.Add(_nonDriverDataService.GetNonDriver(Convert.ToInt32(PassengerID)));
+                            passengers.Add(_nonDriverDataService.GetNonDriverByID(Convert.ToInt32(PassengerID)));
                         }
                         carpool.CarpoolId = Convert.ToInt32(oldCarpool[0]);
                         carpool.Owner = ownerDriver;
@@ -59,6 +74,7 @@ namespace TecAlliance.Carpools.Data.Services{
                         carpool.FreeSpaces = Convert.ToInt32(oldCarpool[5]);
                         carpool.Passengers = passengers;
                         carpool.Time = oldCarpool[6];
+                        carpool.Deleted = Convert.ToBoolean(oldCarpool[7]);
 
                         carpools.Add(carpool);
                     }
@@ -77,11 +93,11 @@ namespace TecAlliance.Carpools.Data.Services{
                     {
                         passengers.Add(passenger.ID);
                     }
-                    streamWriter.WriteLine(string.Join(';', new string[] { Convert.ToString(carpool.CarpoolId), Convert.ToString(carpool.Owner.ID), carpool.StartingPoint, carpool.EndingPoint, string.Join(',', passengers), Convert.ToString(carpool.FreeSpaces), carpool.Time }));
+                    streamWriter.WriteLine(string.Join(';', new string[] { Convert.ToString(carpool.CarpoolId), Convert.ToString(carpool.Owner.ID), carpool.StartingPoint, carpool.EndingPoint, string.Join(',', passengers), Convert.ToString(carpool.FreeSpaces), carpool.Time ,Convert.ToString(carpool.Deleted)}));
                 }
             }
         }
-        public Carpool GetCarpoolData(int carpoolID)
+        public Carpool GetCarpoolDataByID(int carpoolID)
         {
             allCarpools = ReadCarpoolData();
             if (allCarpools == null)

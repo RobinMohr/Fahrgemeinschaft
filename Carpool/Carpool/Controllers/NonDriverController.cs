@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Reflection.Metadata;
 using System.Threading.Channels;
 using TecAlliance.Carpools.Business.Models;
-using TecAlliance.Carpools.Business.Services;
+using TecAlliance.Carpools.Business.Services.Interfaces;
 using TecAlliance.Carpools.Data.Models;
 
 namespace Carpools.Controllers
@@ -39,7 +39,7 @@ namespace Carpools.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<NonDriverDto>> Get(int id)
         {
-            var foo = _nonDriverBusinessService.GetNonDriver(id);
+            var foo = _nonDriverBusinessService.GetNonDriverByID(id);
             if (foo == null)
             {
                 return NotFound();
@@ -56,7 +56,7 @@ namespace Carpools.Controllers
             {
                 return BadRequest();
             }
-            return _nonDriverBusinessService.UpdateNonDriver(id, pw, name, city);
+            return _nonDriverBusinessService.ChangeNonDriverDataByID(id, pw, name, city);
         }
 
         [HttpPost]
@@ -77,7 +77,7 @@ namespace Carpools.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<NonDriverDto>> DeleteNonDriver(int id, string password)
         {
-            NonDriverDto deletedNonDriver = _nonDriverBusinessService.DelNonDriver(id, password);
+            NonDriverDto deletedNonDriver = _nonDriverBusinessService.DelNonDriverByID(id, password);
             if (deletedNonDriver == null)
             {
                 return BadRequest();
@@ -90,7 +90,7 @@ namespace Carpools.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<List<CarpoolDto>>> ViewCurrentCarpools(int userID)
         {
-            List<CarpoolDto> allCurrentCarpools = _nonDriverBusinessService.ViewCurrentCarpools(userID);
+            List<CarpoolDto> allCurrentCarpools = _nonDriverBusinessService.GetCarpoolsForUserID(userID);
             if (allCurrentCarpools == null)
             {
                 return NotFound($"ID:{userID} was not found");

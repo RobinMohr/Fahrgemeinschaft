@@ -1,6 +1,6 @@
 ﻿using TecAlliance.Carpools.Data.Services;
 
-namespace TecAlliance.Carpool.Api
+namespace TecAlliance.Carpools.Api
 {
     public class Files
     {

@@ -5,13 +5,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TecAlliance.Carpools.Data.Models;
+using TecAlliance.Carpools.Data.Services.Interfaces;
 
 namespace TecAlliance.Carpools.Data.Services
 {
     public class DriverDataService : IDriverDataService
     {
-        private readonly string PathDriverData = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\DriverInformation.csv";
+
+        private string pathDriverData = @$"{Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"..\"))}TecAlliance.Carpool.Data\DriverInformation.csv";
         private List<Driver> allDrivers = new List<Driver>();
+
+        public string PathDriverData
+        {
+            get
+            {
+                return this.pathDriverData;
+            }
+            set
+            {
+                this.pathDriverData = value;
+
+            }
+        }
+
+        public DriverDataService(string pathDriverData)
+        {
+            PathDriverData = pathDriverData;
+        }
 
         public List<Driver> ReadNonDriverData()
         {
@@ -31,13 +51,14 @@ namespace TecAlliance.Carpools.Data.Services
                         driver.Password = driverFromCsv[1];
                         driver.Name = driverFromCsv[2];
                         driver.City = driverFromCsv[3];
+                        driver.Deleted = Convert.ToBoolean(driverFromCsv[4]);
                         data.Add(driver);
                     }
                 }
             }
             return data;
         }
-        public Driver GetDriver(int userId)
+        public Driver GetDriverByID(int userId)
         {
             allDrivers = ReadNonDriverData();
             for (int i = 0; i < allDrivers.Count; i++)
@@ -63,7 +84,7 @@ namespace TecAlliance.Carpools.Data.Services
             {
                 for (int p = 0; p < drivers.Count; p++)
                 {
-                    sw.WriteLine(String.Join(";", new string[] { Convert.ToString(drivers[p].ID), drivers[p].Password, drivers[p].Name, drivers[p].City }));
+                    sw.WriteLine(String.Join(";", new string[] { Convert.ToString(drivers[p].ID), drivers[p].Password, drivers[p].Name, drivers[p].City, Convert.ToString(drivers[p].Deleted) }));
                 }
             }
         }

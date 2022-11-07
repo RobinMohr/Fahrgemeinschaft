@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Reflection.Metadata;
 using TecAlliance.Carpools.Business.Models;
-using TecAlliance.Carpools.Business.Services;
+using TecAlliance.Carpools.Business.Services.Interfaces;
 using TecAlliance.Carpools.Data.Models;
 
 namespace Carpools.Controllers
@@ -38,7 +38,7 @@ namespace Carpools.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<DriverDto>> Get(int id)
         {
-            var returnedDriver = driverBusinessService.GetDriver(id);
+            var returnedDriver = driverBusinessService.GetDriverById(id);
             if (returnedDriver == null)
             {
                 return NotFound($"ID:{id} was not found.");
@@ -51,7 +51,7 @@ namespace Carpools.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<DriverDto>> Updatedriver(int id, string pw, string name, string city)
         {
-            var updatedDriver = driverBusinessService.UpdateDriver(id, pw, name, city);
+            var updatedDriver = driverBusinessService.ChangeDriverDataByID(id, pw, name, city);
             if (updatedDriver == null)
             {
                 return NotFound($"ID:{id} was not found.");
@@ -78,7 +78,7 @@ namespace Carpools.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<DriverDto>> DeleteDriver(int id, string password)
         {
-            DriverDto deletedDriver = driverBusinessService.DelDriver(id, password);
+            DriverDto deletedDriver = driverBusinessService.DelDriverByID(id, password);
             if (deletedDriver == null)
             {
                 return BadRequest();
@@ -91,7 +91,7 @@ namespace Carpools.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<List<Carpool>>> ViewCurrentCarpools(int userID)
         {
-            List<Carpool> allCurrentCarpools = driverBusinessService.ViewCurrentCarpools(userID);
+            List<Carpool> allCurrentCarpools = driverBusinessService.GetCarpoolsForUserID(userID);
             if (allCurrentCarpools == null)
             {
                 return NotFound($"No current Carpools can be found");

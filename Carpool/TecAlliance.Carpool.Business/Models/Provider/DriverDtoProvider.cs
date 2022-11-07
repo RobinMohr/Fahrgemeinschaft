@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TecAlliance.Carpools.Business.Models
+namespace TecAlliance.Carpools.Business.Models.Provider
 {
     public class DriverDtoProvider : IExamplesProvider<DriverDto>
     {

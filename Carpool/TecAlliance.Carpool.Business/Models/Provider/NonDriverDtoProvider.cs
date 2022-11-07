@@ -7,13 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TecAlliance.Carpools.Business.Models
+namespace TecAlliance.Carpools.Business.Models.Provider
 {
     public class NonDriverDtoProvider : IExamplesProvider<NonDriverDto>
     {
         public NonDriverDto GetExamples()
         {
-            return new NonDriverDto { Name = "Pascalll Passagier", City = "Janz weet drousen", ID = 99};
+            return new NonDriverDto { Name = "Pascalll Passagier", City = "Janz weet drousen", ID = 99 };
         }
     }
 }

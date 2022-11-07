@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.Design;
 using System.Reflection.Metadata;
 using TecAlliance.Carpools.Business.Models;
-using TecAlliance.Carpools.Business.Services;
+using TecAlliance.Carpools.Business.Services.Interfaces;
 using TecAlliance.Carpools.Data.Models;
 
 namespace Carpools.Controllerss
@@ -26,7 +26,7 @@ namespace Carpools.Controllerss
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<List<CarpoolDto>>> GetAll()
         {
-            List<CarpoolDto> allCarpools = _carpoolBusinessService.GetAll();
+            List<CarpoolDto> allCarpools = _carpoolBusinessService.GetAllCarpools();
             if (allCarpools == null)
             {
                 return NotFound();
@@ -39,7 +39,7 @@ namespace Carpools.Controllerss
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<CarpoolDto>> Get(int carpoolID)
         {
-            CarpoolDto singleCarpool = _carpoolBusinessService.Get(carpoolID);
+            CarpoolDto singleCarpool = _carpoolBusinessService.GetCarpoolByID(carpoolID);
             if (singleCarpool == null)
             {
                 return NotFound();
@@ -52,7 +52,7 @@ namespace Carpools.Controllerss
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CarpoolDto>> ChangeCarpool(int carpoolID, string startingPoint, string endingPoint, int freeSpaces, string time)
         {
-            CarpoolDto changedCarpool = _carpoolBusinessService.UpdateCarpool(carpoolID, startingPoint, endingPoint, freeSpaces, time);
+            CarpoolDto changedCarpool = _carpoolBusinessService.ChangeCarpoolDataByID(carpoolID, startingPoint, endingPoint, freeSpaces, time);
             if (changedCarpool == null)
             {
                 return BadRequest();
@@ -61,6 +61,8 @@ namespace Carpools.Controllerss
         }
 
         [HttpPut("join/{JoinID}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CarpoolDto>> JoinCarpool(int JoinID, int userID)
         {
             CarpoolDto joinedCarpool = _carpoolBusinessService.JoinCarpool(JoinID, userID);
@@ -89,7 +91,7 @@ namespace Carpools.Controllerss
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<CarpoolDto>> DeleteDriver(int id, int ownerID)
         {
-            CarpoolDto carpoolDTO = _carpoolBusinessService.DelCarpool(id, ownerID);
+            CarpoolDto carpoolDTO = _carpoolBusinessService.DelCarpoolByID(id, ownerID);
 
             if (carpoolDTO == null)
             {
